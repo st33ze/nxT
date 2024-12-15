@@ -1,0 +1,62 @@
+/* ====================|| FONTS ||==================== */
+/* @font-face {
+  font-family: 'Poppins';
+  src: url('./assets/poppins-regular-webfont.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+} */
+/* @font-face {
+  font-family: 'Poppins';
+  src: url('./assets/poppins-extralight-webfont.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+} */
+
+/* ====================|| VARIABLES ||==================== */
+/* :root {
+  --clr-primary-500: 0deg, 0%, 12%;
+  --clr-secondary-500: 359deg, 86%, 38%;
+  --clr-accent-500: 133deg, 56%, 47%; 
+  --bg-primary: 0deg, 0%, 85%;
+
+  --ff-primary: 'Poppins', sans-serif;
+
+  --fw-light: 200;
+  --fw-regular: 400;
+  --fs-400: 1rem;
+  --fs-450: 1.25rem;
+  --fs-500: 1.5rem;
+  --fs-600: 2rem;
+  --fs-700: 2.5rem;
+  --fs-800: 3rem;
+} */
+
+/* ====================|| CSS RESET ||==================== */
+/*
+  Josh's Custom CSS Reset
+  https://www.joshwcomeau.com/css/custom-css-reset/
+*/
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+input, button, textarea, select {
+  font: inherit;
+}
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+  font-weight: var(--fw-regular);
+}
+#root, #__next {
+  isolation: isolate;
+}
