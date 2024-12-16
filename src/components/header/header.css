@@ -1,0 +1,14 @@
+header {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: hsl(var(--bg-primary-500));
+}
+
+@media screen and (min-width: 900px) {
+  header {
+    bottom: auto;
+    width: min(25vw, 400px);
+    height: 100dvh;
+  }
+}
