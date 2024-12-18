@@ -1,7 +1,22 @@
 import './header.css';
+import logoImg from '../../assets/logo.png';
 import Navbar from '../nav/nav.js';
 
 const header = document.createElement('header');
+
+function createLogo() {
+  const logo = document.createElement('a');
+  logo.href = '/';
+  logo.classList.add('logo');
+
+  const img = document.createElement('img');
+  img.src = logoImg;
+  img.alt = 'App logo';
+
+  logo.appendChild(img);
+  header.appendChild(logo);
+}
+createLogo();
 
 // Create navbar
 const menuItems = [

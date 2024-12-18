@@ -5,10 +5,22 @@ header {
   background-color: hsl(var(--bg-primary-500));
 }
 
+.logo {
+  display: none;
+  width: 100px;
+}
+
 @media screen and (min-width: 900px) {
   header {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
     bottom: auto;
     width: min(25vw, 400px);
     height: 100dvh;
+    padding: 2rem 0rem 0rem 1rem;
+  }
+  .logo {
+    display: block;
   }
 }
