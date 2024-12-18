@@ -19,12 +19,12 @@
   width: 40px;
   height: 40px;
 }
-.main-nav span {
+.main-nav a span:last-child {
   display: inline-block;
 }
 
 @media screen and (max-width: 899px) {
-  .main-nav span {
+  .main-nav a span:last-child {
     position: absolute;
     width: 1px;
     height: 1px;
