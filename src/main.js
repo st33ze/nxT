@@ -10,4 +10,5 @@ document.body.appendChild(app);
 app.appendChild(header);
 
 const content = new Content();
-content.render(app, 'today'); // Render starting page
+const startingPage = await content.render('today');
+app.appendChild(startingPage);
