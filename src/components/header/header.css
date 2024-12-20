@@ -1,7 +1,5 @@
 header {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+  grid-row: 2;
   background-color: hsl(var(--bg-primary-500));
 }
 
@@ -12,12 +10,11 @@ header {
 
 @media screen and (min-width: 900px) {
   header {
+    grid-row: 1;
+    grid-column: 1;
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    bottom: auto;
-    width: min(25vw, 400px);
-    height: 100dvh;
     padding: 2rem 0rem 0rem 1rem;
   }
   .logo {

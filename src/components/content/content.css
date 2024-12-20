@@ -1,0 +1,10 @@
+main {
+  grid-row: 1;
+  padding-bottom: 2rem;
+}
+
+@media screen and (min-width: 900px) {
+  main {
+    grid-column: 2;
+  }
+}

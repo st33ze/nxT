@@ -73,3 +73,15 @@ body {
   color: hsl(var(--clr-primary-500));
   background-color: hsl(var(--bg-primary-400));
 }
+#app {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: 100vh;
+}
+
+@media screen and (min-width: 900px) {
+  #app {
+    grid-template-columns: min(25vw, 400px) 1fr;
+    grid-template-rows: 1fr;
+  }
+}
