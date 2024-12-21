@@ -1,4 +1,4 @@
-header {
+.nav-header {
   grid-row: 2;
   background-color: hsl(var(--bg-primary-500));
 }
@@ -9,7 +9,7 @@ header {
 }
 
 @media screen and (min-width: 900px) {
-  header {
+  .nav-header {
     grid-row: 1;
     grid-column: 1;
     display: flex;
