@@ -7,3 +7,8 @@
   font-weight: var(--fw-bold);
   text-align: center;
 }
+.add-btn {
+  position: absolute;
+  bottom: 0;
+  right: 2rem;
+}

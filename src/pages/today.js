@@ -1,5 +1,6 @@
 import './today.css';
 import Button from '../components/common/button.js';
+import { icons } from '../assets/icons.js';
 
 export default class Today {
   #node
@@ -19,11 +20,16 @@ export default class Today {
     return header;
   }
 
+  #createAddTaskBtn() {
+    const button = new Button(icons.add, 'add-btn', 'new task');
+    return button.render();
+  }
+
   render() {
     const header = this.#createHeader();
-    const addTaskBtn = new Button('new task');
+    const addTaskBtn = this.#createAddTaskBtn();
 
-    this.#node.append(header, addTaskBtn.render());
+    this.#node.append(header, addTaskBtn);
 
     return this.#node;
   }
