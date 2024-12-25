@@ -48,7 +48,7 @@ export default class Router {
       
       // Instantiate and render the page
       const page = new Page();
-      return page.render();
+      return page.node;
     } catch (error) {
       return this.#handleError(error, 'An error occurred while loading the page.');
     }
