@@ -1,5 +1,5 @@
 import './nav.css';
-import {icons} from '../../assets/icons.js';
+import icons from '../../assets/icons';
 
 export default class Navbar {
   #node;
