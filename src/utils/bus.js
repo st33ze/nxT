@@ -10,6 +10,14 @@ class EventBus {
     if(!this.#listeners[event]) return;
     this.#listeners[event].forEach(callback => callback(data));
   }
+
+  clear(event) {
+    if (this.#listeners[event]) this.#listeners[event] = [];
+  }
+
+  get listeners() {
+    return this.#listeners;
+  }
 }
 
 export default new EventBus();
