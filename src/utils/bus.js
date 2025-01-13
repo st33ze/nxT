@@ -11,13 +11,16 @@ class EventBus {
     this.#listeners[event].forEach(callback => callback(data));
   }
 
-  clear(event) {
-    if (this.#listeners[event]) this.#listeners[event] = [];
+  clear(...events) {
+    events.forEach(event => {
+      if (this.#listeners[event]) this.#listeners[event] = []
+    })
   }
+}
 
-  get listeners() {
-    return this.#listeners;
-  }
+export const EVENTS = {
+  MODAL_CLOSE: 'modal:close',
+  MODAL_SAVE: 'modal:save',
 }
 
 export default new EventBus();
