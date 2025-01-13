@@ -245,18 +245,19 @@ class TaskPriority {
    */
   #setButtonActive(button) {
     button.classList.add('priority-active');
-    this.#updateTogglerColor()
+    this.#updateTogglerColor(`--clr-prio-${this.#priority}`);
   }
 
   /**
    * Resets the styles of the previously selected item and menu toggler button.
    */
   #resetButtonStyles() {
+    this.#updateTogglerColor();
+
     const activeItem = this.#menuElements.find(item => item.classList.contains('priority-active'));
     if (!activeItem) return;
     activeItem.classList.remove('priority-active');
     
-    this.#updateTogglerColor('low');
   }
 
   /**
@@ -264,8 +265,9 @@ class TaskPriority {
    * 
    * @param {string} [priority=this.#priority] - The priority to set the color for. 
    */
-  #updateTogglerColor(priority = this.#priority) {
-    this.#node.style.setProperty('--btn-color', `hsl(var(--clr-prio-${priority}))`);
+  #updateTogglerColor(color) {
+    color = color || '--clr-secondary-500';
+    this.#node.style.setProperty('--btn-color', `hsl(var(${color}))`);
   }
 
   /**
@@ -292,8 +294,9 @@ class TaskPriority {
    */
   set value(priority) {
     this.#resetButtonStyles();
-
+    console.log('test')
     if (this.#options.includes(priority)) {
+      console.log('test2')
       this.#priority = priority;
       const button = this.#menuElements.find(item => item.classList.contains(`priority-${priority}`));
       this.#setButtonActive(button);

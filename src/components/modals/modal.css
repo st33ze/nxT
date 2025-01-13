@@ -44,5 +44,5 @@
 }
 .modal-window > button {
   margin-left: auto;
-  color: hsl(var(--clr-prio-low));
+  color: hsl(var(--clr-secondary-500));
 }

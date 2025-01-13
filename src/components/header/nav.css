@@ -9,7 +9,7 @@
   list-style: none;
 }
 .main-nav a {
-  color: hsla(var(--clr-prio-low));
+  color: hsla(var(--clr-secondary-500));
   text-decoration: none;
 }
 .main-nav .nav-item-active {

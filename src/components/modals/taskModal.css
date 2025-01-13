@@ -14,13 +14,13 @@
 }
 .contenteditable:empty:before {
   content: attr(placeholder);
-  color: hsl(var(--clr-prio-low));
+  color: hsl(var(--clr-secondary-500));
 }
 .task-modal h2 {
   font-size: var(--fs-450);
 }
 .input-empty {
-  color: hsla(var(--clr-prio-low));
+  color: hsla(var(--clr-secondary-500));
 }
 /* ====================|| BUTTON BAR ||==================== */
 .button-bar {
@@ -65,7 +65,7 @@
   border: none;
 }
 .task-priority {
-  --btn-color: hsl(var(--clr-prio-low));
+  --btn-color: hsl(var(--clr-secondary-500));
   display: flex;
 }
 .task-priority > button {
@@ -79,7 +79,7 @@
   overflow: hidden;
   padding: 0;
   bottom: 3rem;
-  color: hsl(var(--clr-prio-low));
+  color: hsl(var(--clr-secondary-500));
   background-color: gainsboro;
   list-style: none;
   border-radius: 4px 4px 4px 0px;

@@ -17,9 +17,10 @@
 /* ====================|| VARIABLES ||==================== */
 :root {
   --clr-primary-500: 214deg, 58%, 9%;
-  --clr-prio-low: 240deg 0% 45%;
+  --clr-secondary-500: 240deg 0% 45%;
+  --clr-prio-low: 203, 40%, 58%;
   --clr-prio-high: 7deg 91% 61%;
-  --clr-prio-medium: 45deg, 96%, 48%; 
+  --clr-prio-medium: 45deg, 96%, 48%;
   --bg-primary-400: 0deg, 0%, 95%;
   --bg-primary-500: 0deg, 4%, 89%;
 
