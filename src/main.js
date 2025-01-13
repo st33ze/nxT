@@ -1,7 +1,7 @@
 import './main.css';
 
 import Header from './components/header/header.js';
-import Content from './components/content/content.js';
+import Page from './pages/page.js';
 
 const app = document.createElement('div');
 app.id = 'app';
@@ -10,6 +10,6 @@ document.body.appendChild(app);
 const header = new Header();
 app.appendChild(header.render());
 
-const content = new Content();
-const startingPage = await content.render('today');
+const page = new Page();
+const startingPage = await page.render('today');
 app.appendChild(startingPage);

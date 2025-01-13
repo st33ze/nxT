@@ -1,7 +1,7 @@
-import './content.css';
-import Router from '../../router/router.js';
+import './page.css';
+import Router from '../router/router.js';
 
-export default class Content {
+export default class Page {
   #node;
   #router
 
