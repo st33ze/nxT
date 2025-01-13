@@ -1,5 +1,5 @@
 import './page.css';
-import Router from '../router/router.js';
+import Router from '../utils/router.js';
 
 export default class Page {
   #node;
