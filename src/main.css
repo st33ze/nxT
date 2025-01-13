@@ -19,7 +19,7 @@
   --clr-primary-500: 214deg, 58%, 9%;
   --clr-prio-low: 240deg 0% 45%;
   --clr-prio-high: 7deg 91% 61%;
-  --clr-prio-medium: 203deg, 40%, 58%; 
+  --clr-prio-medium: 45deg, 96%, 48%; 
   --bg-primary-400: 0deg, 0%, 95%;
   --bg-primary-500: 0deg, 4%, 89%;
 
@@ -78,7 +78,20 @@ body {
   grid-template-rows: 1fr auto;
   height: 100vh;
 }
-
+.hidden {
+  display: none;
+}
+button {
+  border: none;
+  padding: 0;
+  color: inherit;
+  background-color: inherit;
+  cursor: pointer;
+}
+button svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
 @media screen and (min-width: 900px) {
   #app {
     grid-template-columns: min(25vw, 400px) 1fr;
