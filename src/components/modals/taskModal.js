@@ -294,9 +294,7 @@ class TaskPriority {
    */
   set value(priority) {
     this.#resetButtonStyles();
-    console.log('test')
     if (this.#options.includes(priority)) {
-      console.log('test2')
       this.#priority = priority;
       const button = this.#menuElements.find(item => item.classList.contains(`priority-${priority}`));
       this.#setButtonActive(button);
