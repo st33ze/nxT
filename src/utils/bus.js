@@ -1,9 +1,18 @@
 class EventBus {
   #listeners = {}
 
-  on(event, callback) {
+  on(event, callback, options = {once: false}) {
     if (!this.#listeners[event]) this.#listeners[event] = [];
-    this.#listeners[event].push(callback);
+    
+    const wrappedCallback = (...args) => {
+      callback(...args);  // Call the original callback
+      if (options.once) {
+        // Remove the listener after it fires once
+        this.#listeners[event] = this.#listeners[event].filter(c => c !== wrappedCallback);
+      }
+    };
+
+    this.#listeners[event].push(wrappedCallback);
   }
 
   emit(event, data) {
@@ -13,7 +22,7 @@ class EventBus {
 
   clear(...events) {
     events.forEach(event => {
-      if (this.#listeners[event]) this.#listeners[event] = []
+      if (this.#listeners[event]) this.#listeners[event] = [];
     })
   }
 }
@@ -21,6 +30,14 @@ class EventBus {
 export const EVENTS = {
   MODAL_CLOSE: 'modal:close',
   MODAL_SAVE: 'modal:save',
+  MODAL: {
+    OPEN: 'modal:open'
+  },
+  TASKS_LIST: {MENU_CLOSE: 'tasksList:menuClose'},
+  TASK: {
+    SAVE: 'task:save',
+    DELETE: 'task:delete',
+  },
 }
 
 export default new EventBus();
