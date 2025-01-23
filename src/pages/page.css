@@ -1,5 +1,12 @@
 main {
+  position: relative;
   grid-row: 1;
+  padding-inline: 0.5rem;
+  overflow-x: hidden;
+}
+
+main header {
+  margin-bottom: 1rem;
 }
 
 /* Might me good to make a component and move styles to a seperate file */

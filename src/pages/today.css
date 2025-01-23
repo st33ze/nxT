@@ -1,6 +1,5 @@
 .page-today {
   height: 100%;
-  position: relative;
 }
 .page-today h1 {
   font-size: var(--fs-500);
