@@ -64,14 +64,15 @@ export default class Today {
 
   #addEventListeners() {
     bus.clear(EVENTS.MODAL_CLOSE, EVENTS.MODAL_SAVE);
-    bus.on(EVENTS.MODAL_CLOSE, () => this.#activateNewTaskBtn());
-    bus.on(EVENTS.MODAL_SAVE, (task) => {
-      console.log(task);
-      this.#modal.close();
-      this.#activateNewTaskBtn();
-    })
-
+    bus.on(EVENTS.MODAL.CLOSE, () => this.#activateNewTaskBtn());
+    bus.on(EVENTS.TASK.SAVE, () => {
+      if (this.#modal.isOpen) {
+        this.#modal.close();
+        this.#activateNewTaskBtn();
+      }
+    });
   }
+
   /**
    * Getter for the root DOM node of the "Today" page.
    * @returns {HTMLElement} The root DOM node.

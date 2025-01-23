@@ -33,7 +33,7 @@ export default class Modal {
     this.#closeBtn = createNode('button', {'aria-label': 'Close'});
     this.#closeBtn.appendChild(createSVGElement('close'));
     this.#closeBtn.addEventListener('click', () => {
-      bus.emit(EVENTS.MODAL_CLOSE);
+      bus.emit(EVENTS.MODAL.CLOSE);
       this.close();
     });
 
@@ -66,7 +66,11 @@ export default class Modal {
       this.#node.classList.remove('modal-open', 'modal-closing');
     }, 500);
   }
- 
+  
+  get isOpen() {
+    return this.#node.classList.contains('modal-open');
+  }
+
   /**
    * Retrieves the root node of the modal.
    * @returns {HTMLElement} The root node of the modal.

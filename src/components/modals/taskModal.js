@@ -485,7 +485,7 @@ export default class TaskModal {
         const saveBtn = createNode('button', {'class': 'save-btn hidden'});
         saveBtn.appendChild(createSVGElement('send'));
         saveBtn.addEventListener('click', () => {
-          bus.emit(EVENTS.MODAL_SAVE, this.task);
+          bus.emit(EVENTS.TASK.SAVE, this.task);
           this.render({}); // Empty the modal after saving
           saveBtn.classList.add('hidden');
         });

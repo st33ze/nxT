@@ -28,10 +28,9 @@ class EventBus {
 }
 
 export const EVENTS = {
-  MODAL_CLOSE: 'modal:close',
-  MODAL_SAVE: 'modal:save',
   MODAL: {
-    OPEN: 'modal:open'
+    OPEN: 'modal:open',
+    CLOSE: 'modal:close',
   },
   TASKS_LIST: {MENU_CLOSE: 'tasksList:menuClose'},
   TASK: {
