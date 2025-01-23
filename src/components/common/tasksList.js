@@ -3,6 +3,9 @@ import { createNode } from '../../utils/domUtils.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, {EVENTS} from '../../utils/bus.js';
 
+/**
+ * Class representing a context menu for item management, with options to open a modal or delete a task.
+ */
 class ItemMenu {
   #node
   #modalBtn
@@ -20,18 +23,28 @@ class ItemMenu {
     this.#node.append(this.#modalBtn, this.#deleteBtn);
   }
 
+  /**
+   * Creates a button element with an icon and specified attributes.
+   * @param {string} icon - The icon name to use in the button.
+   * @param {Object} attributes - Attributes to apply to the button.
+   * @returns {HTMLElement} The created button element.
+   */
   static #createButton(icon, attributes) {
     const button = createNode('button', {...attributes});
     button.appendChild(createSVGElement(icon));
     return button;
   }
 
+  /**
+   * Opens the item menu for a specific task.
+   * @param {string} taskID - The ID of the task associated with the menu.
+   */  
   open(taskID) {
     this.#node.classList.remove('hidden');
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        this.#node.classList.add('open'); // Start the animation
+        this.#node.classList.add('open');
         this.#node.setAttribute('aria-hidden', 'false');
         this.#modalBtn.focus();
   
@@ -61,6 +74,11 @@ class ItemMenu {
     });
   }
 
+  /**
+   * Closes the item menu with a transition animation.
+   * Ensures no duplicate closures occur during the process.
+   * @returns {Promise<void>} Resolves when the menu has fully closed.
+   */  
   async close() {
     const isClosing = this.#node.classList.contains('closing');
     if (isClosing || !this.isOpen) return;
@@ -69,7 +87,7 @@ class ItemMenu {
     
     await new Promise((resolve) => {
       const onTransitionEnd = (event) => {
-        if (event.target === this.#node) { // Ensure it's the right element
+        if (event.target === this.#node) {
           this.#node.removeEventListener('transitionend', onTransitionEnd);
           this.#node.classList.remove('closing', 'open');
           this.#node.setAttribute('aria-hidden', 'true');
@@ -91,6 +109,9 @@ class ItemMenu {
   }
 }
 
+/**
+ * Class representing a task item in a task list.
+ */
 class TaskListItem {
   #node
   #checkbox
@@ -110,25 +131,33 @@ class TaskListItem {
     this.#node.append(this.#checkbox, this.#titleNode);
   }
 
+  /**
+   * Creates a checkbox input element for marking task completion.
+   * @param {boolean} isTaskDone - Whether the task is completed.
+   * @returns {HTMLInputElement} The created checkbox element.
+   */  
   static #createCheckbox(isTaskDone) {
     const checkbox = createNode('input', {
-      'type': 'checkbox',
-      'name': 'is-task-done',
+      type: 'checkbox',
+      name: 'is-task-done',
       'aria-label': 'Is task done',
     });
     checkbox.checked = isTaskDone ?? false;
-
     return checkbox;
   }
 
+  /**
+   * Creates a button element for the task title.
+   * @param {string} title - The title of the task.
+   * @returns {HTMLButtonElement} The created title node.
+   */  
   static #createTitleNode(title) {
     const titleNode = createNode('button', {
-      'class': 'li-task-title',
+      class: 'li-task-title',
       'aria-haspopup': 'true',
       'aria-expanded': 'false',
     });
     titleNode.textContent = title;
-
     return titleNode;
   }
 
@@ -181,30 +210,47 @@ class TaskListItem {
   }
 }
 
+/**
+ * Class representing a list of tasks with management and sorting functionality.
+ */
 export default class TasksList {
   #node
   #tasks = {}
   static #itemMenu = new ItemMenu();
 
+  /**
+   * Constructs a TasksList instance and initializes the task list.
+   * @param {Array<Object>} tasks - Array of task objects.
+   */  
   constructor(tasks=[]) {
-    this.#node = createNode('ul', {'class': 'tasks-list'});
-    tasks.forEach(task => this.#tasks[task.id] = new TaskListItem(task));
+    this.#node = createNode('ul', {class: 'tasks-list'});
+    tasks.forEach(task => {
+      this.#tasks[task.id] = new TaskListItem(task)
+    });
     TasksList.#sort(this.#tasks).forEach(task => this.#node.appendChild(task.node));
     this.#node.addEventListener('click', this.#handleClickEvent);
   }
 
+  /**
+   * Determines the order number of a task based on its priority and completion status.
+   * @param {TaskListItem} task - The task to evaluate.
+   * @returns {number} The order number for the task.
+   */  
   static #getOrderNumber(task) {
     const PRIORITY_ORDER = {'high': 0, 'medium': 1, 'low': 2};
 
     if (task.isDone) return 4;
-
     if (task.priority in PRIORITY_ORDER) {
       return PRIORITY_ORDER[task.priority];
     }
-
     return 3;
   }
 
+  /**
+   * Sorts tasks based on their priority and completion status.
+   * @param {Object<string, TaskListItem>} tasks - The tasks to sort.
+   * @returns {Array<TaskListItem>} The sorted tasks.
+   */  
   static #sort(tasks) {
     return Object.values(tasks).sort((a, b) => {
       const priorityA = TasksList.#getOrderNumber(a);
@@ -213,6 +259,11 @@ export default class TasksList {
     });
   }
 
+  /**
+   * Updates the positions of tasks in the list for smooth animations during sorting.
+   * @param {HTMLElement} listNode - The list container node.
+   * @param {Object<string, TaskListItem>} tasks - The tasks to update.
+   */  
   static #updatePositions(listNode, tasks) {
     const items = Array.from(listNode.children);
     const ulRect = listNode.getBoundingClientRect();
@@ -229,7 +280,6 @@ export default class TasksList {
       item.style.top = `${topValues[index]}px`;
     });
 
-    // listNode.offsetHeight;
 
     const sortedTasks = TasksList.#sort(tasks);
 
@@ -249,8 +299,15 @@ export default class TasksList {
     }, 500);
   }
 
+  /**
+   * Handles click events on the task list, toggling menus or updating tasks as needed.
+   * @param {MouseEvent} e - The click event.
+   */  
   #handleClickEvent = async (e) => {
-    const taskID = e.target.closest('li').getAttribute('data-task-id');
+    const taskElement = e.target.closest('li');
+    if (!taskElement) return;
+    
+    const taskID = taskElement.getAttribute('data-task-id');
     const task = this.#tasks[taskID];
 
     if (e.target === task.titleNode) {
