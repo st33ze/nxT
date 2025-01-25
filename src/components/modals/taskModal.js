@@ -442,7 +442,7 @@ export default class TaskModal {
       description: new ContentEditable('p', {
         'placeholder': 'Task description'
       }),
-      checkbox: new TaskCheckbox(),
+      completed: new TaskCheckbox(),
       date: new TaskDate(),
       priority: new TaskPriority(),
       project: new TaskProject()
@@ -476,7 +476,7 @@ export default class TaskModal {
       // Create task buttons container
       const taskButtons = createNode('div', {'class': 'task-buttons'});
       taskButtons.append(
-        this.#inputs.checkbox.node, 
+        this.#inputs.completed.node, 
         this.#inputs.date.node, 
         this.#inputs.priority.node, 
         this.#inputs.project.node);
@@ -490,7 +490,7 @@ export default class TaskModal {
           saveBtn.classList.add('hidden');
         });
 
-        // Attchach event listener for input changes
+        // Attach event listener for input changes
         bus.clear('task-input-change');
         bus.on('task-input-change', () => {
           const isHidden = !this.#inputs.title.value || !this.#inputsChanged(task);
@@ -508,7 +508,7 @@ export default class TaskModal {
 
     // Determine if the task is new and adjust UI accordingly
     const isNewTask = Object.keys(task).length === 0;
-    this.#inputs.checkbox.node.classList.toggle('hidden', isNewTask);
+    this.#inputs.completed.node.classList.toggle('hidden', isNewTask);
     
     // Populate input values with task data
     for (const key in this.#inputs) 
