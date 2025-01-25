@@ -5,13 +5,7 @@ import { createNode } from '../utils/domUtils.js';
 import { createSVGElement } from '../assets/icons.js';
 import bus, { EVENTS } from '../utils/bus.js';
 import TasksList from '../components/common/tasksList.js';
-
-const testTasks = [
-  {id: 1, title: 'Lorem ipsum kurven machen', priority: 'high'},
-  {id: 3, title: 'Zatrzymam sie tu pozostajac czysty', priority: 'low'},
-  {id: 2, title: 'Mezo mezo pieprze ten wyscig on the mic many many', isDone: true},
-  {id: 4, title: 'Nawet czarny by pobladł', priority: 'medium'},
-];
+import db from '../utils/dbManager.js';
 
 export default class Today {
   #node
@@ -22,7 +16,6 @@ export default class Today {
     this.#node = createNode('div', {'class': 'page-today'});
 
     const header = this.#createHeader();
-    const taskList = new TasksList(testTasks);
     this.#newTaskBtn = this.#createNewTaskBtn();
 
     const modalContent = new TaskModal();
@@ -30,7 +23,14 @@ export default class Today {
 
     this.#addEventListeners();
 
-    this.#node.append(header, taskList.node, this.#newTaskBtn, this.#modal.node);
+    this.#node.append(header, this.#newTaskBtn, this.#modal.node);
+
+    this.#loadTasks().then((tasks) => {
+      const taskList = new TasksList(tasks);
+      this.#node.insertBefore(taskList.node, this.#newTaskBtn);
+    }).catch((error) => {
+      console.error('Error loading tasks:', error);
+    });
   }
   
   #createHeader() {
@@ -40,6 +40,14 @@ export default class Today {
     
     header.appendChild(title);
     return header;
+  }
+
+  async #loadTasks() {
+    const date = new Date(2025, 0, 24); // FOR TESTING ONLY
+    const dateString = date.toLocaleDateString('en-CA');
+    const tasks = await db.getTasksWithDate(dateString)
+
+    return tasks;
   }
 
   #createNewTaskBtn() {
@@ -73,10 +81,6 @@ export default class Today {
     });
   }
 
-  /**
-   * Getter for the root DOM node of the "Today" page.
-   * @returns {HTMLElement} The root DOM node.
-   */
   get node() {
     return this.#node;
   }
