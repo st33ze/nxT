@@ -1,15 +1,25 @@
 import './main.css';
 
+import { createNode } from './utils/domUtils.js';
+import database from './utils/dbManager.js';
 import Header from './components/header/header.js';
 import Page from './pages/page.js';
 
-const app = document.createElement('div');
-app.id = 'app';
-document.body.appendChild(app);
+async function startApp() {
+  const app = createNode('div', {id: 'app'});
+  const header = new Header();
+  const page = new Page();
+  const startingPage = await page.render('today');
 
-const header = new Header();
-app.appendChild(header.render());
+  app.append(header.render(), startingPage);
+  document.body.appendChild(app);
+}
 
-const page = new Page();
-const startingPage = await page.render('today');
-app.appendChild(startingPage);
+(async () => {
+  try {
+    await database.init();
+    await startApp();
+  } catch(error) {
+    console.error('Failed to initialize the app', error);
+  }
+})();
