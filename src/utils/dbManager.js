@@ -95,7 +95,7 @@ class Database {
     });
   }
 
-  async getTasksWithDate(dateString) {
+  async getTasksByDate(dateString) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore('tasks', 'readonly');
       const index = store.index('byDate');
@@ -110,7 +110,26 @@ class Database {
       request.onerror = (e) => {
         reject(e.target.error);
       };
-      
+    });
+  }
+
+  async getEntity(storeName, id) {
+    return new Promise((resolve, reject) => {
+      const store = this.#getObjectStore(storeName, 'readonly');
+      const request = store.get(id);
+
+      request.onsuccess = (e) => {
+        const task = e.target.result;
+        if (task) {
+          resolve(task);
+        } else {
+          reject(new Error(`Entity with ${id} not found in ${storeName}`));
+        }
+      };
+
+      request.onerror = (e) => {
+        reject(e.target.error);
+      };
     });
   }
 }

@@ -120,12 +120,10 @@ class TaskDate {
    * @throws {Error} Throws an error if the provided value is not a valid Date object.
    */
   set value(date) {
-    if (!date) {
-      this.#input.value = '';
-    } else if (date instanceof Date && !isNaN(date)) {
-      this.#input.value = date.toISOString().split('T')[0];
+    if (date) {
+      this.#input.value = date;
     } else {
-      throw new Error('Invalid Date object');
+      this.#input.value = '';
     }
     this.#updateInputEmptyClass();
   }
@@ -419,6 +417,7 @@ class TaskProject {
 export default class TaskModal {
   #node
   #inputs
+  #saveBtn
   
   /**
    * Constructor initializes the modal with a given task and renders the UI.
@@ -426,7 +425,7 @@ export default class TaskModal {
    */
   constructor() {
     this.#node = createNode('div', {'class': 'task-modal'});
-    this.render();
+    this.#init();
   }
   
   /**
@@ -449,6 +448,42 @@ export default class TaskModal {
     };
   }
 
+  #clearInputs() {
+    Object.values(this.#inputs).forEach(input => {
+      input.value = null;
+    });
+  }
+
+  #init() {
+    this.#inputs = this.#createInputs();
+
+    // Create task buttons container
+    const taskButtons = createNode('div', {'class': 'task-buttons'});
+    taskButtons.append(
+      this.#inputs.completed.node, 
+      this.#inputs.date.node, 
+      this.#inputs.priority.node, 
+      this.#inputs.project.node);
+
+    this.#saveBtn = createNode('div', {class: 'save-btn hidden'});
+    this.#saveBtn.appendChild(createSVGElement('send'));
+    this.#saveBtn.addEventListener('click', () => {
+      bus.emit(EVENTS.TASK.SAVE, this.task);
+      setInterval(() => {
+        this.#clearInputs();
+        this.#saveBtn.classList.add('hidden');
+      }, 500);
+    });
+
+    const buttonBar = createNode('div', {'class': 'button-bar'});
+    buttonBar.append(taskButtons, this.#saveBtn);
+    
+    this.#node.append(
+      this.#inputs.title.node, 
+      this.#inputs.description.node, 
+      buttonBar);
+  }
+
   /**
    * Checks if the input values have changed compared to the provided task.
    * @param {Object} task - The original task object to compare against.
@@ -469,43 +504,12 @@ export default class TaskModal {
    * @param {Object} task - The task data to pre-fill in the modal inputs.
    */
   render(task={}) {
-    if (!this.#inputs) {
-      // Initialize inputs if not already created
-      this.#inputs = this.#createInputs();
-      
-      // Create task buttons container
-      const taskButtons = createNode('div', {'class': 'task-buttons'});
-      taskButtons.append(
-        this.#inputs.completed.node, 
-        this.#inputs.date.node, 
-        this.#inputs.priority.node, 
-        this.#inputs.project.node);
+    bus.clear('task-input-change');
+    bus.on('task-input-change', () => {
+      const isHidden = !this.#inputs.title.value || !this.#inputsChanged(task);
+      this.#saveBtn.classList.toggle('hidden', isHidden);
+    });
         
-        // Create save button
-        const saveBtn = createNode('button', {'class': 'save-btn hidden'});
-        saveBtn.appendChild(createSVGElement('send'));
-        saveBtn.addEventListener('click', () => {
-          bus.emit(EVENTS.TASK.SAVE, this.task);
-          this.render(); // Empty the modal after saving
-          saveBtn.classList.add('hidden');
-        });
-
-        // Attach event listener for input changes
-        bus.clear('task-input-change');
-        bus.on('task-input-change', () => {
-          const isHidden = !this.#inputs.title.value || !this.#inputsChanged(task);
-          saveBtn.classList.toggle('hidden', isHidden);
-        });
-
-        const buttonBar = createNode('div', {'class': 'button-bar'});
-        buttonBar.append(taskButtons, saveBtn);
-        
-        this.#node.append(
-          this.#inputs.title.node, 
-          this.#inputs.description.node, 
-          buttonBar);  
-    }
-
     // Determine if the task is new and adjust UI accordingly
     const isNewTask = Object.keys(task).length === 0;
     this.#inputs.completed.node.classList.toggle('hidden', isNewTask);

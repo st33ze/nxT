@@ -46,9 +46,17 @@ export default class Today {
   async #loadTasks() {
     const date = new Date(2025, 0, 24); // FOR TESTING ONLY
     const dateString = date.toLocaleDateString('en-CA');
-    const tasks = await db.getTasksWithDate(dateString)
+    const tasks = await db.getTasksByDate(dateString);
 
     return tasks;
+  }
+
+  #openModal(task={}) {
+    this.#modalContent.render(task);
+    this.#modal.open(this.#modalContent.node);
+    this.#newTaskBtn.disabled = true;
+
+    bus.on(EVENTS.MODAL.CLOSE, () => this.#activateNewTaskBtn(), {once: true});
   }
 
   #createNewTaskBtn() {
@@ -57,13 +65,7 @@ export default class Today {
       'aria-label': 'Add a task',
     });
     button.appendChild(createSVGElement('add'));
-
-    button.addEventListener('click', () => {
-      // come up with taskModal.render(task) and adjust the taskModal correctly
-      this.#modalContent.render();
-      this.#modal.open(this.#modalContent.node);
-      this.#newTaskBtn.disabled = true;
-    });
+    button.addEventListener('click', () => this.#openModal());
 
     return button;
   }
@@ -74,8 +76,10 @@ export default class Today {
   }
 
   #addEventListeners() {
-    bus.clear(EVENTS.MODAL_CLOSE, EVENTS.MODAL_SAVE);
-    bus.on(EVENTS.MODAL.CLOSE, () => this.#activateNewTaskBtn());
+    bus.clear(EVENTS.MODAL_SAVE);
+    bus.on(EVENTS.MODAL.OPEN, (id) => {
+      db.getEntity('tasks', parseInt(id, 10)).then((task) => this.#openModal(task));
+    });
     bus.on(EVENTS.TASK.SAVE, () => {
       if (this.#modal.isOpen) {
         this.#modal.close();
