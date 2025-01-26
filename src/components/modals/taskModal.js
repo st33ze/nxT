@@ -424,9 +424,9 @@ export default class TaskModal {
    * Constructor initializes the modal with a given task and renders the UI.
    * @param {Object} task - The task object containing pre-filled data (optional).
    */
-  constructor(task={}) {
+  constructor() {
     this.#node = createNode('div', {'class': 'task-modal'});
-    this.render(task);
+    this.render();
   }
   
   /**
@@ -468,7 +468,7 @@ export default class TaskModal {
    * Renders the modal UI with the provided task data.
    * @param {Object} task - The task data to pre-fill in the modal inputs.
    */
-  render(task) {
+  render(task={}) {
     if (!this.#inputs) {
       // Initialize inputs if not already created
       this.#inputs = this.#createInputs();
@@ -486,7 +486,7 @@ export default class TaskModal {
         saveBtn.appendChild(createSVGElement('send'));
         saveBtn.addEventListener('click', () => {
           bus.emit(EVENTS.TASK.SAVE, this.task);
-          this.render({}); // Empty the modal after saving
+          this.render(); // Empty the modal after saving
           saveBtn.classList.add('hidden');
         });
 

@@ -10,6 +10,7 @@ import db from '../utils/dbManager.js';
 export default class Today {
   #node
   #modal
+  #modalContent
   #newTaskBtn
 
   constructor() {
@@ -18,8 +19,8 @@ export default class Today {
     const header = this.#createHeader();
     this.#newTaskBtn = this.#createNewTaskBtn();
 
-    const modalContent = new TaskModal();
-    this.#modal = new Modal(modalContent.node);
+    this.#modalContent = new TaskModal();
+    this.#modal = new Modal(this.#modalContent.node);
 
     this.#addEventListeners();
 
@@ -58,7 +59,9 @@ export default class Today {
     button.appendChild(createSVGElement('add'));
 
     button.addEventListener('click', () => {
-      this.#modal.open();
+      // come up with taskModal.render(task) and adjust the taskModal correctly
+      this.#modalContent.render();
+      this.#modal.open(this.#modalContent.node);
       this.#newTaskBtn.disabled = true;
     });
 
