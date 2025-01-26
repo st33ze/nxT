@@ -43,22 +43,25 @@ export default class Today {
     return header;
   }
 
-  async #loadTasks() {
-    const date = new Date(2025, 0, 24); // FOR TESTING ONLY
-    const dateString = date.toLocaleDateString('en-CA');
-    const tasks = await db.getTasksByDate(dateString);
-
-    return tasks;
+  #activateNewTaskBtn() {
+    this.#newTaskBtn.removeAttribute('disabled');
+    this.#newTaskBtn.focus();
+  }
+  
+  #getTodayStringDate() {
+    const date = new Date();
+    return date.toLocaleDateString('en-CA');
   }
 
   #openModal(task={}) {
+    task.date = task.date ?? this.#getTodayStringDate();
     this.#modalContent.render(task);
     this.#modal.open(this.#modalContent.node);
     this.#newTaskBtn.disabled = true;
-
+    
     bus.on(EVENTS.MODAL.CLOSE, () => this.#activateNewTaskBtn(), {once: true});
   }
-
+  
   #createNewTaskBtn() {
     const button = createNode('button', {
       'class': 'add-btn',
@@ -66,15 +69,10 @@ export default class Today {
     });
     button.appendChild(createSVGElement('add'));
     button.addEventListener('click', () => this.#openModal());
-
+    
     return button;
   }
   
-  #activateNewTaskBtn() {
-    this.#newTaskBtn.removeAttribute('disabled');
-    this.#newTaskBtn.focus();
-  }
-
   #addEventListeners() {
     bus.clear(EVENTS.MODAL_SAVE);
     bus.on(EVENTS.MODAL.OPEN, (id) => {
@@ -86,6 +84,15 @@ export default class Today {
         this.#activateNewTaskBtn();
       }
     });
+  }
+  
+  async #loadTasks() {
+    // const dateString = this.#getTodayStringDate();
+    const date = new Date(2025, 0, 24); // FOR TESTING ONLY
+    const dateString = date.toLocaleDateString('en-CA');
+    const tasks = await db.getTasksByDate(dateString);
+
+    return tasks;
   }
 
   get node() {
