@@ -124,29 +124,29 @@ class TaskListItem {
 
   constructor(task) {
     this.#node = createNode('li', {'data-task-id': task.id});
-    this.#checkbox = TaskListItem.#createCheckbox(task.isDone);
+    this.#checkbox = TaskListItem.#createCheckbox(task.isCompleted);
     this.#titleNode = TaskListItem.#createTitleNode(task.title);
     this.#priority = task.priority;
 
     
     TaskListItem.#updateBorderColor(task.priority, this.#node);
-    TaskListItem.#toggleDoneState(task.isDone, this.#node);
+    TaskListItem.#toggleCompletedState(task.isCompleted, this.#node);
 
     this.#node.append(this.#checkbox, this.#titleNode);
   }
 
   /**
    * Creates a checkbox input element for marking task completion.
-   * @param {boolean} isTaskDone - Whether the task is completed.
+   * @param {boolean} isTaskCompleted - Whether the task is completed.
    * @returns {HTMLInputElement} The created checkbox element.
    */  
-  static #createCheckbox(isTaskDone) {
+  static #createCheckbox(isTaskCompleted) {
     const checkbox = createNode('input', {
       type: 'checkbox',
-      name: 'is-task-done',
-      'aria-label': 'Is task done',
+      name: 'is-task-completed',
+      'aria-label': 'Is task completed',
     });
-    checkbox.checked = isTaskDone ?? false;
+    checkbox.checked = isTaskCompleted ?? false;
     return checkbox;
   }
 
@@ -170,8 +170,8 @@ class TaskListItem {
     node.style.setProperty('--task-clr', color);
   }
 
-  static #toggleDoneState(isTaskDone, node) {
-    node.classList.toggle('task-done', isTaskDone ?? false);
+  static #toggleCompletedState(isTaskCompleted, node) {
+    node.classList.toggle('task-completed', isTaskCompleted ?? false);
   }
 
   onMenuToggle() {
@@ -186,7 +186,7 @@ class TaskListItem {
   }
 
   onCheckboxClick() {
-    TaskListItem.#toggleDoneState(this.#checkbox.checked, this.#node);
+    TaskListItem.#toggleCompletedState(this.#checkbox.checked, this.#node);
   }
 
   get id() {
@@ -197,7 +197,7 @@ class TaskListItem {
     return this.#priority;
   }
 
-  get isDone() {
+  get isCompleted() {
     return this.#checkbox.checked;
   }
 
@@ -238,7 +238,7 @@ export default class TasksList {
   static #getOrderNumber(task) {
     const PRIORITY_ORDER = {'high': 0, 'medium': 1, 'low': 2};
 
-    if (task.isDone) return 4;
+    if (task.isCompleted) return 4;
     if (task.priority in PRIORITY_ORDER) {
       return PRIORITY_ORDER[task.priority];
     }
@@ -255,6 +255,22 @@ export default class TasksList {
       const priorityA = TasksList.#getOrderNumber(a);
       const priorityB = TasksList.#getOrderNumber(b);
       return priorityA - priorityB;
+    });
+  }
+  
+  static #openTaskMenu(task) {
+    const menu = TasksList.#itemMenu;
+    menu.close().then(() => {
+      task.node.appendChild(menu.node);
+      menu.open(task.id);
+
+      task.onMenuToggle();
+
+      bus.on(
+        EVENTS.TASKS_LIST.MENU_CLOSE,
+        () => task.onMenuToggle(),
+        {once: true}
+      );
     });
   }
 
@@ -304,22 +320,6 @@ export default class TasksList {
     delete this.#tasks[id];
   }
 
-  static #openTaskMenu(task) {
-    const menu = TasksList.#itemMenu;
-    menu.close().then(() => {
-      task.node.appendChild(menu.node);
-      menu.open(task.id);
-
-      task.onMenuToggle();
-
-      bus.on(
-        EVENTS.TASKS_LIST.MENU_CLOSE,
-        () => task.onMenuToggle(),
-        {once: true}
-      );
-    });
-  }
-
   #handleClickEvent = (e) => {
     const taskElement = e.target.closest('li');
     if (!taskElement) return;
@@ -334,7 +334,7 @@ export default class TasksList {
         EVENTS.TASK.SAVE,
         {
           id: task.id,
-          isDone: task.isDone,
+          completed: task.isCompleted,
         }
       );
       task.onCheckboxClick();

@@ -19,7 +19,7 @@
   border-radius: 6px;
   transition: transform 0.5s ease;
 }
-.tasks-list .task-done {
+.tasks-list .task-completed {
   color: hsl(var(--clr-secondary-500));
   text-decoration: line-through;
   border-color: transparent;
