@@ -299,21 +299,11 @@ export default class TasksList {
     }, 500);
   }
 
-  /**
-   * Handles click events on the task list, toggling menus or updating tasks as needed.
-   * @param {MouseEvent} e - The click event.
-   */  
-  #handleClickEvent = async (e) => {
-    const taskElement = e.target.closest('li');
-    if (!taskElement) return;
-    
-    const taskID = taskElement.getAttribute('data-task-id');
-    const task = this.#tasks[taskID];
-
-    if (e.target === task.titleNode) {
-      await TasksList.#itemMenu.close();
-      task.node.appendChild(TasksList.#itemMenu.node);
-      TasksList.#itemMenu.open(task.id);
+  static #openTaskMenu(task) {
+    const menu = TasksList.#itemMenu;
+    menu.close().then(() => {
+      task.node.appendChild(menu.node);
+      menu.open(task.id);
 
       task.onMenuToggle();
 
@@ -322,6 +312,18 @@ export default class TasksList {
         () => task.onMenuToggle(),
         {once: true}
       );
+    });
+  }
+
+  #handleClickEvent = (e) => {
+    const taskElement = e.target.closest('li');
+    if (!taskElement) return;
+    
+    const taskID = taskElement.getAttribute('data-task-id');
+    const task = this.#tasks[taskID];
+
+    if (e.target === task.titleNode) {
+      TasksList.#openTaskMenu(task);
     } else if (e.target === task.checkbox) {
       bus.emit(
         EVENTS.TASK.SAVE,
