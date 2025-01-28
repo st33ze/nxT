@@ -5,14 +5,16 @@ class EventBus {
     if (!this.#listeners[event]) this.#listeners[event] = [];
     
     const wrappedCallback = (...args) => {
-      callback(...args);  // Call the original callback
-      if (options.once) {
-        // Remove the listener after it fires once
-        this.#listeners[event] = this.#listeners[event].filter(c => c !== wrappedCallback);
-      }
+      callback(...args);
+      if (options.once) this.off(event, wrappedCallback);
     };
 
     this.#listeners[event].push(wrappedCallback);
+  }
+
+  off(event, listener) {
+    if (!this.#listeners[event]) return;
+    this.#listeners[event] = this.#listeners[event].filter((l) => l !== listener);
   }
 
   emit(event, data) {
@@ -24,6 +26,10 @@ class EventBus {
     events.forEach(event => {
       if (this.#listeners[event]) this.#listeners[event] = [];
     })
+  }
+
+  get listeners() {
+    return this.#listeners;
   }
 }
 
