@@ -50,14 +50,18 @@ class ItemMenu {
   
         const handleClickEvent = (e) => {
           const button = e.target.closest('button');
-          if (button === this.#modalBtn) {
-            bus.emit(EVENTS.MODAL.OPEN, taskID);
-          } else if (button === this.#deleteBtn) {
-            bus.emit(EVENTS.TASK.DELETE, taskID);
-          }
-          this.close();
-
+          const buttonEventMap = new Map([
+            [this.#modalBtn, EVENTS.MODAL.OPEN],
+            [this.#deleteBtn, EVENTS.TASK.DELETE]
+          ]);
+          const event = buttonEventMap.get(button) ?? null;
+          
+          this.close().then(() => {
+            if (event) bus.emit(event, taskID);
+          });
+          
           document.removeEventListener('keydown', handleKeydownEvent);
+              
         };
 
         const handleKeydownEvent = (e) => {
@@ -210,25 +214,20 @@ class TaskListItem {
   }
 }
 
-/**
- * Class representing a list of tasks with management and sorting functionality.
- */
 export default class TasksList {
   #node
   #tasks = {}
   static #itemMenu = new ItemMenu();
 
-  /**
-   * Constructs a TasksList instance and initializes the task list.
-   * @param {Array<Object>} tasks - Array of task objects.
-   */  
   constructor(tasks=[]) {
     this.#node = createNode('ul', {class: 'tasks-list'});
     tasks.forEach(task => {
       this.#tasks[task.id] = new TaskListItem(task)
     });
     TasksList.#sort(this.#tasks).forEach(task => this.#node.appendChild(task.node));
+    
     this.#node.addEventListener('click', this.#handleClickEvent);
+    bus.on(EVENTS.TASK.DELETE, (id) => this.#deleteTask(id));
   }
 
   /**
@@ -297,6 +296,12 @@ export default class TasksList {
       });
       listNode.style.height = 'auto';
     }, 500);
+  }
+  
+  #deleteTask(id) {
+    if (!this.#tasks[id]) return;
+    this.#tasks[id].node.remove();
+    delete this.#tasks[id];
   }
 
   static #openTaskMenu(task) {

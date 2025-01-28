@@ -1,3 +1,5 @@
+import bus, { EVENTS } from "./bus";
+
 const testTasks = [
   {
     id: 1,
@@ -46,6 +48,20 @@ class Database {
   static DB_NAME = 'nxT-task-manager';
   static DB_VERSION = 1;
   #db
+
+  constructor() {
+    this.#addEventListeners();
+  }
+
+  #addEventListeners() {
+    bus.on(EVENTS.TASK.DELETE, (id) => {
+      this.deleteEntity('tasks', id).then((id) => {
+        console.log(`task with id:${id} deleted`);
+      }).catch((error) => {
+        console.error(error);
+      }); 
+    });
+  }
 
   #normalizeId(id) {
     const intId = parseInt(id, 10);
@@ -117,9 +133,20 @@ class Database {
           reject(new Error(`Entity with id:${id} not found in ${storeName}`));
         }
       };
-
+      
       request.onerror = (e) =>
         reject(e.target.error);
+    });
+  }
+  
+  async deleteEntity(storeName, id) {
+    return new Promise((resolve, reject) => {
+      const store = this.#getObjectStore(storeName, 'readwrite');
+      const request = store.delete(this.#normalizeId(id));
+      
+      request.onsuccess = () => resolve(id);
+      request.onerror = (e) =>
+        reject(new Error(`Error deleting entity with id:${id} in ${storeName}`));
     });
   }
 
