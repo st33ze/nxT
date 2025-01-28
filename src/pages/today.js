@@ -74,9 +74,10 @@ export default class Today {
   }
   
   #addEventListeners() {
+    // add {clearAfterReload: true}  ??
     bus.clear(EVENTS.MODAL_SAVE);
     bus.on(EVENTS.MODAL.OPEN, (id) => {
-      db.getEntity('tasks', parseInt(id, 10)).then((task) => this.#openModal(task));
+      db.getEntity('tasks', id).then((task) => this.#openModal(task));
     });
     bus.on(EVENTS.TASK.SAVE, () => {
       if (this.#modal.isOpen) {

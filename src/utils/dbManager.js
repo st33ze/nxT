@@ -47,6 +47,15 @@ class Database {
   static DB_VERSION = 1;
   #db
 
+  #normalizeId(id) {
+    const intId = parseInt(id, 10);
+
+    if (isNaN(intId) || intId < 0) {
+      throw new Error(`Invalid ID: ${id}`);
+    }
+    return intId;
+  }
+
   /**
    * @param {string} storeName - The name of the object store.
    * @param {string} mode - The transaction mode ('readonly', or 'readwrite').
@@ -95,6 +104,25 @@ class Database {
     });
   }
 
+  async getEntity(storeName, id) {
+    return new Promise((resolve, reject) => {
+      const store = this.#getObjectStore(storeName, 'readonly');
+      const request = store.get(this.#normalizeId(id));
+      
+      request.onsuccess = (e) => {
+        const task = e.target.result;
+        if (task) {
+          resolve(task);
+        } else {
+          reject(new Error(`Entity with id:${id} not found in ${storeName}`));
+        }
+      };
+
+      request.onerror = (e) =>
+        reject(e.target.error);
+    });
+  }
+
   async getTasksByDate(dateString) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore('tasks', 'readonly');
@@ -102,31 +130,11 @@ class Database {
       const range = IDBKeyRange.only(dateString);
       
       const request = index.getAll(range);
-
+  
       request.onsuccess = (e) => {
         resolve(e.target.result);
       };
-
-      request.onerror = (e) => {
-        reject(e.target.error);
-      };
-    });
-  }
-
-  async getEntity(storeName, id) {
-    return new Promise((resolve, reject) => {
-      const store = this.#getObjectStore(storeName, 'readonly');
-      const request = store.get(id);
-
-      request.onsuccess = (e) => {
-        const task = e.target.result;
-        if (task) {
-          resolve(task);
-        } else {
-          reject(new Error(`Entity with ${id} not found in ${storeName}`));
-        }
-      };
-
+  
       request.onerror = (e) => {
         reject(e.target.error);
       };
