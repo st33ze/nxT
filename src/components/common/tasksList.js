@@ -320,6 +320,12 @@ export default class TasksList {
     delete this.#tasks[id];
   }
 
+  #updateTask(task) {
+    bus.emit(EVENTS.TASK.SAVE, {id: task.id, completed: task.completed});
+    task.onCheckboxClick();
+    TasksList.#updatePositions(this.#node, this.#tasks);
+  }
+
   #handleClickEvent = (e) => {
     const taskElement = e.target.closest('li');
     if (!taskElement) return;
@@ -330,15 +336,7 @@ export default class TasksList {
     if (e.target === task.titleNode) {
       TasksList.#openTaskMenu(task);
     } else if (e.target === task.checkbox) {
-      bus.emit(
-        EVENTS.TASK.SAVE,
-        {
-          id: task.id,
-          completed: task.isCompleted,
-        }
-      );
-      task.onCheckboxClick();
-      TasksList.#updatePositions(this.#node, this.#tasks);
+      this.#updateTask(task);
     }
   }
 
