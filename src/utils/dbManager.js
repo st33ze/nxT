@@ -43,24 +43,45 @@ const testTasks = [
   }
 ]
 
-
 class Database {
   static DB_NAME = 'nxT-task-manager';
   static DB_VERSION = 1;
+  static UPDATE_INTERVAL = 30 * 1000; // Time in ms
+  #unsavedChanges = {tasks: []};
   #db
 
   constructor() {
     this.#addEventListeners();
+    this.#startPerodicDatabaseUpdate();
   }
 
   #addEventListeners() {
-    bus.on(EVENTS.TASK.DELETE, (id) => {
-      this.deleteEntity('tasks', id).then((id) => {
-        console.log(`task with id:${id} deleted`);
-      }).catch((error) => {
-        console.error(error);
-      }); 
+    bus.on(EVENTS.TASK.DELETE, async (id) => {
+      const task = await this.getEntity('tasks', id);
+      if (task) {
+        task.deleted = true;
+        this.#unsavedChanges['tasks'].push(task);
+      }
     });
+  }
+
+  #getLatestChanges(changes) {
+    const latestChangesMap = new Map();
+    changes.forEach(change => latestChangesMap.set(change.id, change));
+    return Array.from(latestChangesMap.values());
+  }
+
+  #startPerodicDatabaseUpdate() {
+    setInterval(() => {
+      for (const storeName in this.#unsavedChanges) {
+        const pendingChanges = this.#unsavedChanges[storeName];
+        this.#unsavedChanges[storeName] = [];
+        if (pendingChanges.length === 0) continue;
+
+        const latestChanges = this.#getLatestChanges(pendingChanges);
+        this.#save(storeName, latestChanges);
+      }
+    }, Database.UPDATE_INTERVAL);
   }
 
   #normalizeId(id) {
@@ -72,38 +93,33 @@ class Database {
     return intId;
   }
 
-  /**
-   * @param {string} storeName - The name of the object store.
-   * @param {string} mode - The transaction mode ('readonly', or 'readwrite').
-   * @returns {IDBObjectStore} - The object store instance for the specified store name.
-   */
   #getObjectStore(storeName, mode) {
     const transaction = this.#db.transaction(storeName, mode);
-    return  transaction.objectStore(storeName);
+    return transaction.objectStore(storeName);
   }
 
   async init() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(Database.DB_NAME, Database.DB_VERSION);
-      
+
       req.onsuccess = (e) => {
         console.log('Database initialized');
         this.#db = e.target.result;
         resolve();
       };
-  
+
       req.onerror = (e) => {
         console.error('Database initialization failed', e.target.errorCode);
         reject(e.target.errorCode);
       };
-  
+
       req.onupgradeneeded = (e) => {
         const db = e.target.result;
-  
+
         if (!db.objectStoreNames.contains('tasks')) {
-          const taskStore = db.createObjectStore('tasks', {keyPath: 'id', autoIncrement: true});
-          taskStore.createIndex('byPriority', 'priority', {unique: false});
-          taskStore.createIndex('byDate', 'date', {unique: false});
+          const taskStore = db.createObjectStore('tasks', { keyPath: 'id', autoIncrement: true });
+          taskStore.createIndex('byPriority', 'priority', { unique: false });
+          taskStore.createIndex('byDate', 'date', { unique: false });
 
           testTasks.forEach((task) => taskStore.put(task)); // TEST ONLY!!!
         }
@@ -111,12 +127,30 @@ class Database {
     });
   }
 
-  async saveEntity(storeName, entity) {
+  async #save(storeName, items) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore(storeName, 'readwrite');
-      const request = store.put(entity);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = (e) => reject(e.target.error);
+      const results = [];
+      const errors = [];
+
+      for  (const item of items) {
+        const request = store.put(item);
+
+        request.onsuccess = () => results.push({item, status: 'success'});
+        request.onerror = (e) => errors.push({item, error: e.target.error });
+      }
+
+      store.transaction.oncomplete = () => {
+        console.log(`Saving operation for ${storeName} store completed with:`, results);
+        if (errors.length > 0) {
+          console.warn('Some items failed to save:', errors);
+        }
+        resolve();
+      };
+      store.transaction.onerror = (e) => {
+        console.error(`Failed while updating ${storeName}`, e);
+        reject();
+      };
     });
   }
 
@@ -124,7 +158,7 @@ class Database {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore(storeName, 'readonly');
       const request = store.get(this.#normalizeId(id));
-      
+
       request.onsuccess = (e) => {
         const task = e.target.result;
         if (task) {
@@ -133,17 +167,17 @@ class Database {
           reject(new Error(`Entity with id:${id} not found in ${storeName}`));
         }
       };
-      
+
       request.onerror = (e) =>
         reject(e.target.error);
     });
   }
-  
+
   async deleteEntity(storeName, id) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore(storeName, 'readwrite');
       const request = store.delete(this.#normalizeId(id));
-      
+
       request.onsuccess = () => resolve(id);
       request.onerror = (e) =>
         reject(new Error(`Error deleting entity with id:${id} in ${storeName}`));
@@ -155,13 +189,13 @@ class Database {
       const store = this.#getObjectStore('tasks', 'readonly');
       const index = store.index('byDate');
       const range = IDBKeyRange.only(dateString);
-      
+
       const request = index.getAll(range);
-  
+
       request.onsuccess = (e) => {
         resolve(e.target.result);
       };
-  
+
       request.onerror = (e) => {
         reject(e.target.error);
       };
