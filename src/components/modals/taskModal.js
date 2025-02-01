@@ -29,7 +29,7 @@ class ContentEditable {
    * @param {string} newValue - The new value for the input
    */
   set value(newValue) {
-    this.#node.textContent = newValue || '';
+    this.#node.textContent = newValue ?? '';
   }
 
   get value() {
@@ -418,6 +418,7 @@ export default class TaskModal {
   #node
   #inputs
   #saveBtn
+  #initalValues
   
   /**
    * Constructor initializes the modal with a given task and renders the UI.
@@ -427,7 +428,11 @@ export default class TaskModal {
     this.#node = createNode('div', {'class': 'task-modal'});
     this.#init();
   }
-  
+
+  static #normalizeValue(value) {
+    return typeof value === 'string' && value.trim() === '' ? null: value;
+  }
+
   /**
    * Creates the input elements for the modal.
    * @returns {Object} - An object containing all input elements.
@@ -469,7 +474,7 @@ export default class TaskModal {
     this.#saveBtn.appendChild(createSVGElement('send'));
     this.#saveBtn.addEventListener('click', () => {
       bus.emit(EVENTS.TASK.SAVE, this.task);
-      setInterval(() => {
+      setTimeout(() => {
         this.#clearInputs();
         this.#saveBtn.classList.add('hidden');
       }, 500);
@@ -489,12 +494,12 @@ export default class TaskModal {
    * @param {Object} task - The original task object to compare against.
    * @returns {boolean} - True if any input value has changed, otherwise false.
    */
-  #inputsChanged(task) {
+  #inputsChanged() {
     for (const key in this.#inputs) {
       const inputValue = this.#inputs[key].value;
-      const taskValue = task[key];
-      if (!inputValue && !taskValue) continue; // Both are empty
-      if (inputValue !== taskValue) return true
+      const initialValue = this.#initalValues[key];
+      if (!inputValue && !initialValue) continue; // Both are empty
+      if (inputValue !== initialValue) return true
     }
     return false;
   }
@@ -504,19 +509,22 @@ export default class TaskModal {
    * @param {Object} task - The task data to pre-fill in the modal inputs.
    */
   render(task={}) {
+    this.#initalValues = task;
+    
     bus.clear('task-input-change');
     bus.on('task-input-change', () => {
-      const isHidden = !this.#inputs.title.value || !this.#inputsChanged(task);
+      const isHidden = !this.#inputs.title.value || !this.#inputsChanged();
       this.#saveBtn.classList.toggle('hidden', isHidden);
     });
         
-    // Determine if the task is new and adjust UI accordingly
-    const isNewTask = Object.keys(task).length === 0;
-    this.#inputs.completed.node.classList.toggle('hidden', isNewTask);
     
-    // Populate input values with task data
+    const isNewTask = !task.title;
+    const taskCompletedCheckbox = this.#inputs.completed.node;
+    taskCompletedCheckbox.classList.toggle('hidden', isNewTask);
+    
+    // Populate input values
     for (const key in this.#inputs) 
-      this.#inputs[key].value = task[key];
+      this.#inputs[key].value = this.#initalValues[key];
   }
 
   /**
@@ -524,12 +532,11 @@ export default class TaskModal {
    * @returns {Object} - The task data object.
    */  
   get task() {
-    const task = {};
+    const currentValues = {};
     for (const key in this.#inputs) {
-      if (this.#inputs[key].value) 
-        task[key] = this.#inputs[key].value;
+      currentValues[key] = TaskModal.#normalizeValue(this.#inputs[key].value);
     }
-    return task;
+    return {...this.#initalValues, ...currentValues};
   }
 
   /**
