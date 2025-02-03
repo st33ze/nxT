@@ -9,9 +9,10 @@ import db from '../utils/dbManager.js';
 
 export default class Today {
   #node
-  #modal
-  #modalContent
   #newTaskBtn
+  #modalContent
+  #modal
+  #taskList
 
   constructor() {
     this.#node = createNode('div', {'class': 'page-today'});
@@ -20,15 +21,15 @@ export default class Today {
     this.#newTaskBtn = this.#createNewTaskBtn();
 
     this.#modalContent = new TaskModal();
-    this.#modal = new Modal(this.#modalContent.node);
+    this.#modal = new Modal();
 
     this.#addEventListeners();
 
     this.#node.append(header, this.#newTaskBtn, this.#modal.node);
 
-    this.#loadTasks().then((tasks) => {
-      const taskList = new TasksList(tasks);
-      this.#node.insertBefore(taskList.node, this.#newTaskBtn);
+    this.#loadTasksFromDB().then((tasks) => {
+      this.#taskList = new TasksList(tasks);
+      this.#node.insertBefore(this.#taskList.node, this.#newTaskBtn);
     }).catch((error) => {
       console.error('Error loading tasks:', error);
     });
@@ -42,17 +43,12 @@ export default class Today {
     header.appendChild(title);
     return header;
   }
-
-  #activateNewTaskBtn() {
-    this.#newTaskBtn.removeAttribute('disabled');
-    this.#newTaskBtn.focus();
-  }
   
   #getTodayStringDate() {
     const date = new Date();
     return date.toLocaleDateString('en-CA');
   }
-
+  
   #openModal(task={}) {
     task.date = task.date ?? this.#getTodayStringDate();
     this.#modalContent.render(task);
@@ -61,7 +57,7 @@ export default class Today {
     
     bus.on(EVENTS.MODAL.CLOSE, () => this.#activateNewTaskBtn(), {once: true});
   }
-  
+
   #createNewTaskBtn() {
     const button = createNode('button', {
       'class': 'add-btn',
@@ -73,21 +69,35 @@ export default class Today {
     return button;
   }
   
+  #activateNewTaskBtn() {
+    this.#newTaskBtn.removeAttribute('disabled');
+    this.#newTaskBtn.focus();
+  }
+
   #addEventListeners() {
     // add {clearAfterReload: true}  ??
-    bus.clear(EVENTS.MODAL_SAVE);
     bus.on(EVENTS.MODAL.OPEN, (id) => {
-      db.getEntity('tasks', id).then((task) => this.#openModal(task));
+      db.getEntity('tasks', id).then((task) => {
+        this.#openModal(task)
+      });
     });
-    bus.on(EVENTS.TASK.SAVE, () => {
+    bus.on(EVENTS.TASK.SAVE, (task) => {
+      if (task.id) this.#taskList.update(task);
+
+
       if (this.#modal.isOpen) {
         this.#modal.close();
         this.#activateNewTaskBtn();
       }
     });
+    bus.on(EVENTS.DATABASE.TASK_ADDED, (task) => {
+      const date = new Date(2025, 0, 24); // FOR TESTING ONLY
+      const dateString = date.toLocaleDateString('en-CA');
+      if (task.date === dateString) this.#taskList.add(task);
+    });
   }
-  
-  async #loadTasks() {
+
+  async #loadTasksFromDB() {
     // const dateString = this.#getTodayStringDate();
     const date = new Date(2025, 0, 24); // FOR TESTING ONLY
     const dateString = date.toLocaleDateString('en-CA');

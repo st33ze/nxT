@@ -43,6 +43,9 @@ export const EVENTS = {
     SAVE: 'task:save',
     DELETE: 'task:delete',
   },
+  DATABASE: {
+    TASK_ADDED: 'database:taskAdded',
+  }
 }
 
 export default new EventBus();

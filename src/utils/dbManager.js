@@ -46,21 +46,44 @@ const testTasks = [
 class Database {
   static DB_NAME = 'nxT-task-manager';
   static DB_VERSION = 1;
-  static UPDATE_INTERVAL = 30 * 1000; // Time in ms
+  static UPDATE_INTERVAL_IN_SEC = 30;
   #unsavedChanges = {tasks: []};
   #db
-
+  
   constructor() {
     this.#addEventListeners();
     this.#startPerodicDatabaseUpdate();
   }
 
+  #normalizeId(id) {
+    const intId = parseInt(id, 10);
+  
+    if (isNaN(intId) || intId < 0) {
+      throw new Error(`Invalid ID: ${id}`);
+    }
+    return intId;
+  }
+  
   #addEventListeners() {
     bus.on(EVENTS.TASK.DELETE, async (id) => {
       const task = await this.getEntity('tasks', id);
       if (task) {
         task.deleted = true;
-        this.#unsavedChanges['tasks'].push(task);
+        this.#unsavedChanges.tasks.push(task);
+      }
+    });
+
+    bus.on(EVENTS.TASK.SAVE, async (taskData) => {
+      if (taskData.id) {
+        // If task already in DB add to changes queue
+        const originalValues = await this.getEntity('tasks', taskData.id);
+        delete taskData.id; // delete unnormalized id
+        this.#unsavedChanges.tasks.push({...originalValues, ...taskData});
+      } else {
+        // For new tasks save changes immediately
+        this.#save('tasks', taskData).then((result) => {
+          bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
+        });
       }
     });
   }
@@ -81,16 +104,7 @@ class Database {
         const latestChanges = this.#getLatestChanges(pendingChanges);
         this.#save(storeName, latestChanges);
       }
-    }, Database.UPDATE_INTERVAL);
-  }
-
-  #normalizeId(id) {
-    const intId = parseInt(id, 10);
-
-    if (isNaN(intId) || intId < 0) {
-      throw new Error(`Invalid ID: ${id}`);
-    }
-    return intId;
+    }, Database.UPDATE_INTERVAL_IN_SEC  * 1000);
   }
 
   #getObjectStore(storeName, mode) {
@@ -133,10 +147,15 @@ class Database {
       const results = [];
       const errors = [];
 
-      for  (const item of items) {
+      const itemsArray = Array.isArray(items) ? items: [items];
+
+      for (const item of itemsArray) {
         const request = store.put(item);
 
-        request.onsuccess = () => results.push({item, status: 'success'});
+        request.onsuccess = (e) => {
+          const id = item.id ?? e.target.result;
+          results.push({...item, id});
+        };
         request.onerror = (e) => errors.push({item, error: e.target.error });
       }
 
@@ -145,7 +164,7 @@ class Database {
         if (errors.length > 0) {
           console.warn('Some items failed to save:', errors);
         }
-        resolve();
+        resolve(results);
       };
       store.transaction.onerror = (e) => {
         console.error(`Failed while updating ${storeName}`, e);
@@ -156,8 +175,15 @@ class Database {
 
   async getEntity(storeName, id) {
     return new Promise((resolve, reject) => {
+      id = this.#normalizeId(id);
+      
+      // Check if there are unsaved changes to the entity
+      const pendingChanges = this.#getLatestChanges(this.#unsavedChanges[storeName]);
+      const unsavedEntity = pendingChanges.find(entity => entity.id === id);
+      if (unsavedEntity) resolve(unsavedEntity);
+
       const store = this.#getObjectStore(storeName, 'readonly');
-      const request = store.get(this.#normalizeId(id));
+      const request = store.get(id);
 
       request.onsuccess = (e) => {
         const task = e.target.result;
@@ -193,7 +219,7 @@ class Database {
       const request = index.getAll(range);
 
       request.onsuccess = (e) => {
-        resolve(e.target.result);
+        resolve(e.target.result.filter(task => !task.deleted));
       };
 
       request.onerror = (e) => {

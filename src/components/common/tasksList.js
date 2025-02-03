@@ -116,53 +116,36 @@ class ItemMenu {
 /**
  * Class representing a task item in a task list.
  */
+
 class TaskListItem {
   #node
   #checkbox
   #titleNode
-  #priority
 
   constructor(task) {
     this.#node = createNode('li', {'data-task-id': task.id});
-    this.#checkbox = TaskListItem.#createCheckbox(task.isCompleted);
-    this.#titleNode = TaskListItem.#createTitleNode(task.title);
-    this.#priority = task.priority;
+    this.#checkbox = TaskListItem.#createCheckbox();
+    this.#titleNode = TaskListItem.#createTitleNode();
 
-    
-    TaskListItem.#updateBorderColor(task.priority, this.#node);
-    TaskListItem.#toggleCompletedState(task.isCompleted, this.#node);
+    this.update(task);
 
     this.#node.append(this.#checkbox, this.#titleNode);
   }
 
-  /**
-   * Creates a checkbox input element for marking task completion.
-   * @param {boolean} isTaskCompleted - Whether the task is completed.
-   * @returns {HTMLInputElement} The created checkbox element.
-   */  
-  static #createCheckbox(isTaskCompleted) {
-    const checkbox = createNode('input', {
+  static #createCheckbox() {
+    return createNode('input', {
       type: 'checkbox',
       name: 'is-task-completed',
       'aria-label': 'Is task completed',
     });
-    checkbox.checked = isTaskCompleted ?? false;
-    return checkbox;
   }
 
-  /**
-   * Creates a button element for the task title.
-   * @param {string} title - The title of the task.
-   * @returns {HTMLButtonElement} The created title node.
-   */  
-  static #createTitleNode(title) {
-    const titleNode = createNode('button', {
+  static #createTitleNode() {
+    return createNode('button', {
       class: 'li-task-title',
       'aria-haspopup': 'true',
       'aria-expanded': 'false',
     });
-    titleNode.textContent = title;
-    return titleNode;
   }
 
   static #updateBorderColor(priority, node) {
@@ -170,8 +153,21 @@ class TaskListItem {
     node.style.setProperty('--task-clr', color);
   }
 
-  static #toggleCompletedState(isTaskCompleted, node) {
-    node.classList.toggle('task-completed', isTaskCompleted ?? false);
+  toggleCompletedState() {
+    this.#node.classList.toggle('task-completed', this.#checkbox.checked);
+  }
+
+  update(task) {
+    if (task.completed != null) {
+      this.#checkbox.checked = task.completed;
+      this.toggleCompletedState();
+    }
+    if (task.title != null) {
+      this.#titleNode.textContent = task.title;
+    }
+    if ('priority' in task) {
+      TaskListItem.#updateBorderColor(task.priority, this.#node);
+    }
   }
 
   onMenuToggle() {
@@ -183,22 +179,6 @@ class TaskListItem {
     this.#checkbox.disabled = isMenuOpen;
 
     if (!isMenuOpen) this.#titleNode.focus();
-  }
-
-  onCheckboxClick() {
-    TaskListItem.#toggleCompletedState(this.#checkbox.checked, this.#node);
-  }
-
-  get id() {
-    return this.#node.getAttribute('data-task-id');
-  }
-
-  get priority() {
-    return this.#priority;
-  }
-
-  get isCompleted() {
-    return this.#checkbox.checked;
   }
 
   get checkbox() {
@@ -215,41 +195,37 @@ class TaskListItem {
 }
 
 export default class TasksList {
-  #node
-  #tasks = {}
   static #itemMenu = new ItemMenu();
-
+  #node
+  #tasks
+  #listItems
+  
   constructor(tasks=[]) {
     this.#node = createNode('ul', {class: 'tasks-list'});
-    tasks.forEach(task => {
-      this.#tasks[task.id] = new TaskListItem(task)
-    });
-    TasksList.#sort(this.#tasks).forEach(task => this.#node.appendChild(task.node));
     
+    this.#tasks = {}, this.#listItems = {};
+    tasks.forEach(task => {
+      this.#tasks[task.id] = task;
+      this.#listItems[task.id] = new TaskListItem(task);
+    });
+    TasksList.#sort(this.#tasks).forEach(task => {
+      this.#node.appendChild(this.#listItems[task.id].node);
+    });
+
     this.#node.addEventListener('click', this.#handleClickEvent);
     bus.on(EVENTS.TASK.DELETE, (id) => this.#deleteTask(id));
   }
-
-  /**
-   * Determines the order number of a task based on its priority and completion status.
-   * @param {TaskListItem} task - The task to evaluate.
-   * @returns {number} The order number for the task.
-   */  
+ 
   static #getOrderNumber(task) {
     const PRIORITY_ORDER = {'high': 0, 'medium': 1, 'low': 2};
 
-    if (task.isCompleted) return 4;
+    if (task.completed) return 4;
     if (task.priority in PRIORITY_ORDER) {
       return PRIORITY_ORDER[task.priority];
     }
     return 3;
   }
-
-  /**
-   * Sorts tasks based on their priority and completion status.
-   * @param {Object<string, TaskListItem>} tasks - The tasks to sort.
-   * @returns {Array<TaskListItem>} The sorted tasks.
-   */  
+  
   static #sort(tasks) {
     return Object.values(tasks).sort((a, b) => {
       const priorityA = TasksList.#getOrderNumber(a);
@@ -258,17 +234,17 @@ export default class TasksList {
     });
   }
   
-  static #openTaskMenu(task) {
+  static #openTaskMenu(listItem, taskID) {
     const menu = TasksList.#itemMenu;
     menu.close().then(() => {
-      task.node.appendChild(menu.node);
-      menu.open(task.id);
+      listItem.node.appendChild(menu.node);
+      menu.open(taskID);
 
-      task.onMenuToggle();
+      listItem.onMenuToggle();
 
       bus.on(
         EVENTS.TASKS_LIST.MENU_CLOSE,
-        () => task.onMenuToggle(),
+        () => listItem.onMenuToggle(),
         {once: true}
       );
     });
@@ -279,11 +255,13 @@ export default class TasksList {
    * @param {HTMLElement} listNode - The list container node.
    * @param {Object<string, TaskListItem>} tasks - The tasks to update.
    */  
-  static #updatePositions(listNode, tasks) {
-    const items = Array.from(listNode.children);
-    const ulRect = listNode.getBoundingClientRect();
+  #updatePositions() {
+    const ul = this.#node;
+    ul.style.pointerEvents = 'none';
+    const items = Array.from(ul.children);
+    const ulRect = ul.getBoundingClientRect();
 
-    listNode.style.height = ulRect.height + 'px';
+    ul.style.height = ulRect.height + 'px';
 
     const topValues = items.map(item => {
       const rect = item.getBoundingClientRect();
@@ -295,49 +273,62 @@ export default class TasksList {
       item.style.top = `${topValues[index]}px`;
     });
 
-
-    const sortedTasks = TasksList.#sort(tasks);
+    const sortedTasks = TasksList.#sort(this.#tasks);
 
     sortedTasks.forEach((task, index) => {
-      const top = task.node.getBoundingClientRect().top - ulRect.top;
-      task.node.style.transform = `translateY(${topValues[index] - top}px)`;
+      const li = this.#listItems[task.id].node;
+      const top = li.getBoundingClientRect().top - ulRect.top;
+      li.style.transform = `translateY(${topValues[index] - top}px)`;
     });
 
     setTimeout(() => {
       sortedTasks.forEach(task => {
-        listNode.appendChild(task.node);
-        task.node.style.transform = 'none';
-        task.node.style.position = 'relative';
-        task.node.style.top = '';
+        const li = this.#listItems[task.id].node;
+        ul.appendChild(li);
+        li.style.transform = 'none';
+        li.style.position = 'relative';
+        li.style.top = '';
       });
-      listNode.style.height = 'auto';
+      ul.style.height = 'auto';
+      ul.style.pointerEvents = 'auto';
     }, 500);
   }
   
   #deleteTask(id) {
     if (!this.#tasks[id]) return;
-    this.#tasks[id].node.remove();
     delete this.#tasks[id];
-  }
-
-  #updateTask(task) {
-    bus.emit(EVENTS.TASK.SAVE, {id: task.id, completed: task.completed});
-    task.onCheckboxClick();
-    TasksList.#updatePositions(this.#node, this.#tasks);
+    this.#listItems[id].node.remove();
+    delete this.#listItems[id];
   }
 
   #handleClickEvent = (e) => {
-    const taskElement = e.target.closest('li');
-    if (!taskElement) return;
+    const li = e.target.closest('li');
+    if (!li) return;
     
-    const taskID = taskElement.getAttribute('data-task-id');
-    const task = this.#tasks[taskID];
+    const id = li.getAttribute('data-task-id');
+    const task = this.#tasks[id];
+    const taskLI = this.#listItems[id];
 
-    if (e.target === task.titleNode) {
-      TasksList.#openTaskMenu(task);
-    } else if (e.target === task.checkbox) {
-      this.#updateTask(task);
+    if (e.target === taskLI.titleNode) {
+      TasksList.#openTaskMenu(taskLI, id);
+    } else if (e.target === taskLI.checkbox) {
+      task.completed = e.target.checked;
+      bus.emit(EVENTS.TASK.SAVE, {id, completed: task.completed});
     }
+  }
+
+  update(task) {
+    const id = task.id;
+    this.#tasks[id] = {...this.#tasks[id], ...task};
+    this.#listItems[id].update(task);
+    this.#updatePositions();
+  }
+
+  add(task) {
+    this.#tasks[task.id] = task;
+    this.#listItems[task.id] = new TaskListItem(task);
+    this.#node.appendChild(this.#listItems[task.id].node);
+    this.#updatePositions();
   }
 
   get node() {
