@@ -76,7 +76,7 @@ export default class Today {
 
   #addEventListeners() {
     // add {clearAfterReload: true}  ??
-    bus.on(EVENTS.MODAL.OPEN, (id) => {
+    bus.on(EVENTS.TASKS_LIST.TASK_DETAILS, (id) => {
       db.getEntity('tasks', id).then((task) => {
         this.#openModal(task)
       });

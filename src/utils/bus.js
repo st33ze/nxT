@@ -38,7 +38,10 @@ export const EVENTS = {
     OPEN: 'modal:open',
     CLOSE: 'modal:close',
   },
-  TASKS_LIST: {MENU_CLOSE: 'tasksList:menuClose'},
+  TASKS_LIST: {
+    MENU_CLOSE: 'tasksList:menuClose',
+    TASK_DETAILS: 'taskList:taskDetails',
+  },
   TASK: {
     SAVE: 'task:save',
     DELETE: 'task:delete',

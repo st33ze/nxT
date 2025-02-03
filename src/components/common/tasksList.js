@@ -51,7 +51,7 @@ class ItemMenu {
         const handleClickEvent = (e) => {
           const button = e.target.closest('button');
           const buttonEventMap = new Map([
-            [this.#modalBtn, EVENTS.MODAL.OPEN],
+            [this.#modalBtn, EVENTS.TASKS_LIST.TASK_DETAILS],
             [this.#deleteBtn, EVENTS.TASK.DELETE]
           ]);
           const event = buttonEventMap.get(button) ?? null;
