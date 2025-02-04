@@ -22,7 +22,7 @@ class ContentEditable {
     if (!this.#node.textContent.trim()) {
       this.#node.innerHTML = '';
     }
-    bus.emit('task-input-change');
+    bus.emit(EVENTS.MODAL.INPUT_CHANGE);
   }
 
   /**
@@ -55,7 +55,7 @@ class TaskCheckbox {
       'type': 'checkbox', 
       'aria-label': 'Task completed'
     });
-    this.#node.addEventListener('change', () => bus.emit('task-input-change'));
+    this.#node.addEventListener('change', () => bus.emit(EVENTS.MODAL.INPUT_CHANGE));
   }
 
   /**
@@ -98,7 +98,7 @@ class TaskDate {
     });
     input.addEventListener('change', () => {
       this.#updateInputEmptyClass();
-      bus.emit('task-input-change');
+      bus.emit(EVENTS.MODAL.INPUT_CHANGE);
     });
     return input;
   }
@@ -233,7 +233,7 @@ class TaskPriority {
     
     this.#toggleMenu();
     
-    bus.emit('task-input-change');
+    bus.emit(EVENTS.MODAL.INPUT_CHANGE);
   }
 
   /**
@@ -347,7 +347,7 @@ class TaskProject {
     });
     selector.addEventListener('change', () => {
       this.#node.classList.toggle('input-empty', !selector.value);
-      bus.emit('task-input-change');
+      bus.emit(EVENTS.MODAL.INPUT_CHANGE);
     });
 
     // Add default option and project options
@@ -426,7 +426,21 @@ export default class TaskModal {
    */
   constructor() {
     this.#node = createNode('div', {'class': 'task-modal'});
+
+    this.#addEventListeners();
+
     this.#init();
+  }
+
+  #addEventListeners() {
+    bus.on(
+      EVENTS.MODAL.INPUT_CHANGE, 
+      () => {
+        const isHidden = !this.#inputs.title.value || !this.#inputsChanged();
+        this.#saveBtn.classList.toggle('hidden', isHidden);
+      },
+      {clearOnReload: true}
+    );
   }
 
   static #normalizeValue(value) {
@@ -512,13 +526,8 @@ export default class TaskModal {
   render(task={}) {
     this.#initalValues = task;
     
-    bus.clear('task-input-change');
-    bus.on('task-input-change', () => {
-      const isHidden = !this.#inputs.title.value || !this.#inputsChanged();
-      this.#saveBtn.classList.toggle('hidden', isHidden);
-    });
-        
-    
+    this.#saveBtn.classList.add('hidden');
+
     const isNewTask = !task.title;
     const taskCompletedCheckbox = this.#inputs.completed.node;
     taskCompletedCheckbox.classList.toggle('hidden', isNewTask);
@@ -540,10 +549,6 @@ export default class TaskModal {
     return {...this.#initalValues, ...currentValues};
   }
 
-  /**
-   * Returns the DOM node for the modal.
-   * @returns {HTMLElement} - The modal's root DOM node.
-   */  
   get node() {
     return this.#node;
   }
