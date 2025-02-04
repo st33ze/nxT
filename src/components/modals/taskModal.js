@@ -474,6 +474,7 @@ export default class TaskModal {
     this.#saveBtn.appendChild(createSVGElement('send'));
     this.#saveBtn.addEventListener('click', () => {
       bus.emit(EVENTS.TASK.SAVE, this.task);
+      bus.emit(EVENTS.MODAL.CLOSE);
       setTimeout(() => {
         this.#clearInputs();
         this.#saveBtn.classList.add('hidden');
