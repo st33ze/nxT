@@ -1,35 +1,45 @@
 class EventBus {
-  #listeners = {}
+  #listeners = new Map();
+  #pageListeners = new Map();
 
-  on(event, callback, options = {once: false}) {
-    if (!this.#listeners[event]) this.#listeners[event] = [];
-    
-    const wrappedCallback = (...args) => {
-      callback(...args);
-      if (options.once) this.off(event, wrappedCallback);
-    };
-
-    this.#listeners[event].push(wrappedCallback);
+  off(event, callback) {
+    [this.#listeners, this.#pageListeners].forEach(map => {
+      const eventSet = map.get(event);
+      eventSet?.delete(callback);
+      if (eventSet?.size === 0) {
+        map.delete(event);
+      }
+    });
   }
 
-  off(event, listener) {
-    if (!this.#listeners[event]) return;
-    this.#listeners[event] = this.#listeners[event].filter((l) => l !== listener);
+  on(event, callback, options = {}) {
+    const wrappedCallback = (...args) => {
+      callback(...args);
+      if (options.once === true) this.off(event, wrappedCallback);
+    }
+
+    const targetMap = options.clearOnReload ? this.#pageListeners: this.#listeners;
+
+    if (!targetMap.has(event)) {
+      targetMap.set(event, new Set());
+    }
+    targetMap.get(event).add(wrappedCallback);
   }
 
   emit(event, data) {
-    if(!this.#listeners[event]) return;
-    this.#listeners[event].forEach(callback => callback(data));
+    [this.#listeners, this.#pageListeners].forEach(map => {
+      const eventSet = map.get(event);
+      eventSet?.forEach(callback => callback(data));
+    });
   }
 
-  clear(...events) {
-    events.forEach(event => {
-      if (this.#listeners[event]) this.#listeners[event] = [];
-    })
+  clearPageListeners() {
+    this.#pageListeners.clear();
   }
 
-  get listeners() {
-    return this.#listeners;
+  logListeners() {
+    console.log('App listeners:', this.#listeners);
+    console.log('Temp listeners:', this.#pageListeners);
   }
 }
 
