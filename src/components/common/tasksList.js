@@ -213,7 +213,7 @@ export default class TasksList {
     });
 
     this.#node.addEventListener('click', this.#handleClickEvent);
-    bus.on(EVENTS.TASK.DELETE, (id) => this.#deleteTask(id));
+    bus.on(EVENTS.TASK.DELETE, (id) => this.#deleteTask(id), {clearOnReload: true});
   }
  
   static #getOrderNumber(task) {

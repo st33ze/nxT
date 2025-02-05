@@ -25,15 +25,15 @@ export default class Today {
     this.#modal = new Modal(() => this.#onModalClose());
 
     this.#addEventListeners();
-
     this.#node.append(pageContent, this.#modal.node);
-
+    
     this.#loadTasksFromDB().then((tasks) => {
       this.#taskList = new TasksList(tasks);
       pageContent.appendChild(this.#taskList.node);
     }).catch((error) => {
       console.error('Error loading tasks:', error);
     });
+    bus.logListeners();
   }
   
   #createHeader() {
@@ -74,20 +74,31 @@ export default class Today {
   }
 
   #addEventListeners() {
-    // add {clearAfterReload: true}  ??
-    bus.on(EVENTS.TASKS_LIST.TASK_DETAILS, (id) => {
-      db.getEntity('tasks', id).then((task) => this.#openModal(task));
-    });
+    bus.on(
+      EVENTS.TASKS_LIST.TASK_DETAILS, 
+      (id) => {
+        db.getEntity('tasks', id).then((task) => this.#openModal(task));
+      },
+      {clearOnReload: true}
+    );
 
-    bus.on(EVENTS.TASK.SAVE, (task) => {
-      if (task.id) this.#taskList.update(task);
-    });
+    bus.on(
+      EVENTS.TASK.SAVE, 
+      (task) => {
+        if (task.id) this.#taskList.update(task);
+      },
+      {clearOnReload: true}
+    );
 
-    bus.on(EVENTS.DATABASE.TASK_ADDED, (task) => {
-      const date = new Date(2025, 0, 24); // FOR TESTING ONLY
-      const dateString = date.toLocaleDateString('en-CA');
-      if (task.date === dateString) this.#taskList.add(task);
-    });
+    bus.on(
+      EVENTS.DATABASE.TASK_ADDED, 
+      (task) => {
+        const date = new Date(2025, 0, 24); // FOR TESTING ONLY
+        const dateString = date.toLocaleDateString('en-CA');
+        if (task.date === dateString) this.#taskList.add(task);
+      },
+      {clearOnReload: true}
+    );
   }
 
   async #loadTasksFromDB() {

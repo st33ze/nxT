@@ -19,8 +19,8 @@ export default class Modal {
   }
   
   #addEventListeners() {
-    bus.on(EVENTS.MODAL.OPEN, (content) => this.#open(content));
-    bus.on(EVENTS.MODAL.CLOSE, () => this.#close());
+    bus.on(EVENTS.MODAL.OPEN, (content) => this.#open(content), {clearOnReload: true});
+    bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
   }
 
   #render() {
