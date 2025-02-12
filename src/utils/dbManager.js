@@ -227,6 +227,22 @@ class Database {
       };
     });
   }
+
+  async getStoreItems(storeName) {
+    return new Promise((resolve, reject) => {
+      const store = this.#getObjectStore(storeName, 'readonly');
+      const request = store.getAll();
+
+      request.onsuccess = (e) => {
+        resolve(e.target.result.filter(task => !task.deleted));
+      }
+      request.onerror = (e) => {
+        console.error(`Error while getting items from store: ${storeName}`, e.target.error);
+        reject();
+      }
+
+    });
+  }
 }
 
 export default new Database();
