@@ -1,3 +1,23 @@
+/* ====================|| TASK LISTS CONTAINER ||==================== */
+.task-lists-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: auto;
+  h2 {
+    padding-left: 4px;
+    font-size: var(--fs-400);
+    color: hsl(var(--clr-secondary-500));
+    background-color: hsl(var(--bg-primary-500));
+    font-weight: var(--fw-bold);
+    border-radius: 6px;
+
+    + .task-list {
+      margin-top: 0.25rem;
+    }
+  }
+}
+
 /* ====================|| TASK LIST ||==================== */
 .task-list {
   --task-clr: transparent;
