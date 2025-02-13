@@ -4,7 +4,7 @@ import TaskModal from '../components/modals/taskModal.js';
 import { createNode } from '../utils/domUtils.js';
 import { createSVGElement } from '../assets/icons.js';
 import bus, { EVENTS } from '../utils/bus.js';
-import TasksList from '../components/common/tasksList.js';
+import { TaskList } from '../components/common/taskList.js';
 import db from '../utils/dbManager.js';
 
 export default class Today {
@@ -28,12 +28,11 @@ export default class Today {
     this.#node.append(pageContent, this.#modal.node);
     
     this.#loadTasksFromDB().then((tasks) => {
-      this.#taskList = new TasksList(tasks);
+      this.#taskList = new TaskList(tasks);
       pageContent.appendChild(this.#taskList.node);
     }).catch((error) => {
       console.error('Error loading tasks:', error);
     });
-    bus.logListeners();
   }
   
   #createHeader() {
@@ -85,7 +84,7 @@ export default class Today {
     bus.on(
       EVENTS.TASK.SAVE, 
       (task) => {
-        if (task.id) this.#taskList.update(task);
+        if (task.id) this.#taskList.save(task);
       },
       {clearOnReload: true}
     );
@@ -95,8 +94,14 @@ export default class Today {
       (task) => {
         const date = new Date(2025, 0, 24); // FOR TESTING ONLY
         const dateString = date.toLocaleDateString('en-CA');
-        if (task.date === dateString) this.#taskList.add(task);
+        if (task.date === dateString) this.#taskList.save(task);
       },
+      {clearOnReload: true}
+    );
+
+    bus.on(
+      EVENTS.TASK.DELETE,
+      (taskId) => this.#taskList.delete(taskId),
       {clearOnReload: true}
     );
   }
