@@ -9,15 +9,6 @@ main header {
   margin-bottom: 1rem;
 }
 
-/* Might me good to make a component and move styles to a seperate file */
-.add-btn {
-  padding: 0.5rem;
-  color: hsl(var(--bg-primary-500));
-  background-color: hsl(var(--clr-primary-500));
-  border-radius: 1rem;
-  z-index: 10;
-}
-
 @media screen and (min-width: 900px) {
   main {
     grid-column: 2;

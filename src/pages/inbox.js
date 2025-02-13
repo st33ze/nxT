@@ -1,10 +1,10 @@
 import './inbox.css';
+import { createNode } from '../utils/domUtils.js';
+import AddButton from '../components/common/addButton.js';
 import Modal from '../components/modals/modal.js';
 import TaskModal from '../components/modals/taskModal.js';
-import { createNode } from '../utils/domUtils.js';
-import { createSVGElement } from '../assets/icons.js';
-import bus, { EVENTS } from '../utils/bus.js';
 import { MultiTaskLists } from '../components/common/taskList.js';
+import bus, { EVENTS } from '../utils/bus.js';
 import db from '../utils/dbManager.js';
 
 export default class Inbox {
@@ -18,8 +18,8 @@ export default class Inbox {
 
     const pageContent = createNode('div', {class: 'inbox-content'});
     const header = this.#createHeader();
-    const newTaskBtn = this.#createNewTaskBtn();
-    pageContent.append(header, newTaskBtn);
+    this.newTaskBtn =this.#createNewTaskBtn().node;
+    pageContent.append(header, this.newTaskBtn);
 
     this.#modalContent = new TaskModal();
     this.#modal = new Modal(() => this.#onModalClose());
@@ -49,11 +49,8 @@ export default class Inbox {
   }
 
   #createNewTaskBtn() {
-    const button = createNode('button', {
-      'class': 'add-btn',
-      'aria-label': 'Add a task',
-    });
-    button.appendChild(createSVGElement('add'));
+    const button = new AddButton();
+    button.label = 'Add a task';
     button.addEventListener('click', () => this.#openModal());
     
     return button;
