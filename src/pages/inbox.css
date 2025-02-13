@@ -1,0 +1,18 @@
+.page-inbox {
+  height: 100%;
+}
+.page-inbox h1 {
+  font-size: var(--fs-500);
+  font-weight: var(--fw-bold);
+  text-align: center;
+}
+.add-btn {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+}
+.inbox-content {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
