@@ -55,15 +55,6 @@ class Database {
     this.#startPerodicDatabaseUpdate();
   }
 
-  #normalizeId(id) {
-    const intId = parseInt(id, 10);
-  
-    if (isNaN(intId) || intId < 0) {
-      throw new Error(`Invalid ID: ${id}`);
-    }
-    return intId;
-  }
-  
   #addEventListeners() {
     bus.on(EVENTS.TASK.DELETE, async (id) => {
       const task = await this.getEntity('tasks', id);
@@ -73,15 +64,13 @@ class Database {
       }
     });
 
-    bus.on(EVENTS.TASK.SAVE, async (taskData) => {
-      if (taskData.id) {
+    bus.on(EVENTS.TASK.SAVE, async (task) => {
+      if (task.id) {
         // If task already in DB add to changes queue
-        const originalValues = await this.getEntity('tasks', taskData.id);
-        delete taskData.id; // delete unnormalized id
-        this.#unsavedChanges.tasks.push({...originalValues, ...taskData});
+        this.#unsavedChanges.tasks.push(task);
       } else {
-        // For new tasks save changes immediately
-        this.#save('tasks', taskData).then((result) => {
+        // For new tasks save changes immediately to generate id
+        this.#save('tasks', task).then((result) => {
           bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
         });
       }
@@ -175,8 +164,6 @@ class Database {
 
   async getEntity(storeName, id) {
     return new Promise((resolve, reject) => {
-      id = this.#normalizeId(id);
-      
       // Check if there are unsaved changes to the entity
       const pendingChanges = this.#getLatestChanges(this.#unsavedChanges[storeName]);
       const unsavedEntity = pendingChanges.find(entity => entity.id === id);
@@ -196,17 +183,6 @@ class Database {
 
       request.onerror = (e) =>
         reject(e.target.error);
-    });
-  }
-
-  async deleteEntity(storeName, id) {
-    return new Promise((resolve, reject) => {
-      const store = this.#getObjectStore(storeName, 'readwrite');
-      const request = store.delete(this.#normalizeId(id));
-
-      request.onsuccess = () => resolve(id);
-      request.onerror = (e) =>
-        reject(new Error(`Error deleting entity with id:${id} in ${storeName}`));
     });
   }
 
