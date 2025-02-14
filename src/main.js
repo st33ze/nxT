@@ -8,10 +8,9 @@ import Page from './pages/page.js';
 async function startApp() {
   const app = createNode('div', {id: 'app'});
   const header = new Header();
-  const page = new Page();
-  const startingPage = await page.render('today');
+  const main = new Page();
 
-  app.append(header.render(), startingPage);
+  app.append(header.render(), main.render('today'));
   document.body.appendChild(app);
 }
 

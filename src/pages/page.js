@@ -1,18 +1,17 @@
 import './page.css';
-import Router from '../utils/router.js';
+import router from '../utils/router.js';
 
 export default class Page {
   #node;
-  #router
 
   constructor() {
     this.#node = document.createElement('main');
-    this.#router = new Router();
   }
 
-  async render(pageName) {
-    const page = await this.#router.load(pageName);
-    this.#node.appendChild(page);
+  render(pageName) {
+    router.loadPage(pageName)
+      .then(page => this.#node.appendChild(page))
+      .catch(error => console.error(error));
 
     return this.#node;
   }
