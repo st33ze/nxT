@@ -484,7 +484,7 @@ export default class TaskModal {
       this.#inputs.priority.node, 
       this.#inputs.project.node);
 
-    this.#saveBtn = createNode('div', {class: 'save-btn hidden'});
+    this.#saveBtn = createNode('button', {class: 'save-btn hidden'});
     this.#saveBtn.appendChild(createSVGElement('send'));
     this.#saveBtn.addEventListener('click', () => {
       bus.emit(EVENTS.TASK.SAVE, this.task);
