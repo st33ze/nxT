@@ -10,7 +10,7 @@ async function startApp() {
   const header = new Header();
   const main = new Page();
 
-  app.append(header.render(), main.render('today'));
+  app.append(header.node, main.render('today'));
   document.body.appendChild(app);
 }
 
