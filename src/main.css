@@ -80,6 +80,17 @@ body {
   height: 100vh;
   width: 100vw;
 }
+main {
+  position: relative;
+  grid-row: 1;
+  padding-inline: 0.5rem;
+  overflow-x: hidden;
+
+  header {
+    margin-bottom: 1rem;
+  }
+}
+
 .hidden {
   display: none;
 }
@@ -98,5 +109,8 @@ button svg {
   #app {
     grid-template-columns: min(25vw, 400px) 1fr;
     grid-template-rows: 1fr;
+  }
+  main {
+    grid-column: 2;
   }
 }

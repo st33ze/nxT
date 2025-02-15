@@ -1,8 +1,10 @@
-class Router {
+export default class Router {
   #pageNames;
+  #container;
 
-  constructor() {
+  constructor(container) {
     this.#pageNames = this.#getPageNames();
+    this.#container = container;
   }
 
   #getPageNames() {
@@ -12,7 +14,7 @@ class Router {
       .map(name => name.replace('./', '').replace('.js', ''));
   }
 
-  async loadPage(pageName) {
+  async #loadPage(pageName) {
     if (!this.#pageNames.includes(pageName)) {
       throw new Error('Page not found');
     }
@@ -26,6 +28,15 @@ class Router {
       throw new Error('An error occurred while loading the page:', error);
     }
   }
-}
 
-export default new Router();
+  renderPage(pageName) {
+    this.#loadPage(pageName)
+      .then(page => {
+        this.#container.innerHTML = '';
+        this.#container.appendChild(page);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+}
