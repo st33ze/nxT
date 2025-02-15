@@ -1,6 +1,7 @@
 import './nav.css';
 import { createNode } from '../../utils/domUtils';
 import { createSVGElement } from '../../assets/icons';
+import bus, { EVENTS } from '../../utils/bus';
 
 const NAV_ITEMS = [
   {name: 'today', icon: createSVGElement('today')},
@@ -15,7 +16,9 @@ export default class Navbar {
     this.#node = createNode('nav', {class: 'main-nav'});
     
     this.#populateNav();
-    this.#activateItem('#today');
+    this.#activateItem(this.#node.querySelector('a[href="#today"]'));
+
+    this.#node.addEventListener('click', this.handleNavClick.bind(this));
   }
 
   #populateNav() {
@@ -41,13 +44,20 @@ export default class Navbar {
     this.#node.appendChild(ul);
   }
 
-  #activateItem(href) {
-    const item = this.#node.querySelector(`a[href="${href}"]`);
-    if (!item) return;
-
-    this.#node.querySelector('nav-item-active')?.classList.remove('nav-item-active');
+  #activateItem(item) {
+    this.#node.querySelector('.nav-item-active')?.classList.remove('nav-item-active');
     
     item.classList.add('nav-item-active');
+  }
+
+  handleNavClick(e) {
+    const item = e.target.closest('a');
+    if (!item) return;
+
+    this.#activateItem(item);
+    
+    const pageName = item.getAttribute('href').replace('#', '');
+    bus.emit(EVENTS.PAGE.RENDER, pageName);
   }
 
   get node() {
