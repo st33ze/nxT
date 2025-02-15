@@ -1,3 +1,5 @@
+import bus, { EVENTS } from './bus.js';
+
 export default class Router {
   #pageNames;
   #container;
@@ -5,6 +7,8 @@ export default class Router {
   constructor(container) {
     this.#pageNames = this.#getPageNames();
     this.#container = container;
+
+    this.#addEventListeners();
   }
 
   #getPageNames() {
@@ -12,6 +16,12 @@ export default class Router {
       .context('../pages', false, /\.js$/)
       .keys()
       .map(name => name.replace('./', '').replace('.js', ''));
+  }
+
+  #addEventListeners() {
+    bus.on(EVENTS.PAGE.NAVIGATE, pageName => {
+      this.renderPage(pageName);
+    });
   }
 
   async #loadPage(pageName) {

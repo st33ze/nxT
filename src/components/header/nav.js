@@ -57,7 +57,7 @@ export default class Navbar {
     this.#activateItem(item);
     
     const pageName = item.getAttribute('href').replace('#', '');
-    bus.emit(EVENTS.PAGE.RENDER, pageName);
+    bus.emit(EVENTS.PAGE.NAVIGATE, pageName);
   }
 
   get node() {

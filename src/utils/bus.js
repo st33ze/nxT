@@ -45,7 +45,7 @@ class EventBus {
 
 export const EVENTS = {
   PAGE: {
-    RENDER: 'page:render',
+    NAVIGATE: 'page:navigate',
   },
   MODAL: {
     OPEN: 'modal:open',
