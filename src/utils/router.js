@@ -20,6 +20,7 @@ export default class Router {
 
   #addEventListeners() {
     bus.on(EVENTS.PAGE.NAVIGATE, pageName => {
+      bus.clearPageListeners();
       this.renderPage(pageName);
     });
   }
