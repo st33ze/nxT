@@ -66,15 +66,15 @@ class Database {
 
     bus.on(EVENTS.TASK.SAVE, async (task) => {
       if (task.id) {
-        // If task already in DB add to changes queue
         this.#unsavedChanges.tasks.push(task);
       } else {
-        // For new tasks save changes immediately to generate id
         this.#save('tasks', task).then((result) => {
           bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
         });
       }
     });
+    
+    bus.on(EVENTS.PAGE.NAVIGATE, () => this.savePendingChanges());
   }
 
   #getLatestChanges(changes) {
@@ -82,18 +82,12 @@ class Database {
     changes.forEach(change => latestChangesMap.set(change.id, change));
     return Array.from(latestChangesMap.values());
   }
-
+  
   #startPerodicDatabaseUpdate() {
-    setInterval(() => {
-      for (const storeName in this.#unsavedChanges) {
-        const pendingChanges = this.#unsavedChanges[storeName];
-        this.#unsavedChanges[storeName] = [];
-        if (pendingChanges.length === 0) continue;
-
-        const latestChanges = this.#getLatestChanges(pendingChanges);
-        this.#save(storeName, latestChanges);
-      }
-    }, Database.UPDATE_INTERVAL_IN_SEC  * 1000);
+    setInterval(
+      () => this.savePendingChanges(), 
+      Database.UPDATE_INTERVAL_IN_SEC  * 1000
+    );
   }
 
   #getObjectStore(storeName, mode) {
@@ -218,6 +212,17 @@ class Database {
       }
 
     });
+  }
+
+  async savePendingChanges() {
+    for (const storeName in this.#unsavedChanges) {
+      const pendingChanges = this.#unsavedChanges[storeName];
+      this.#unsavedChanges[storeName] = [];
+      if (pendingChanges.length === 0) continue;
+
+      const latestChanges = this.#getLatestChanges(pendingChanges);
+      this.#save(storeName, latestChanges);
+    }
   }
 }
 
