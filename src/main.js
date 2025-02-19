@@ -15,6 +15,7 @@ async function startApp() {
   document.body.appendChild(app);
   
   const router = new Router(main);
+  history.replaceState({page: 'today'}, '', '');
   router.renderPage('today');
 }
 

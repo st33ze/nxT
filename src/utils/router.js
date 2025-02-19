@@ -20,8 +20,14 @@ export default class Router {
 
   #addEventListeners() {
     bus.on(EVENTS.PAGE.NAVIGATE, pageName => {
-      bus.clearPageListeners();
+      history.pushState({page: pageName}, '', '');
       this.renderPage(pageName);
+    });
+
+    window.addEventListener('popstate', (e) => {
+      if (e.state?.page) {
+        this.renderPage(e.state.page);
+      }
     });
   }
 
@@ -41,6 +47,8 @@ export default class Router {
   }
 
   renderPage(pageName) {
+    bus.clearPageListeners();
+    
     this.#loadPage(pageName)
       .then(page => {
         this.#container.innerHTML = '';
