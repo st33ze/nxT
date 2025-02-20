@@ -16,6 +16,7 @@ const testTasks = [
     date: "2025-01-25",
     priority: "medium",
     completed: true,
+    projectId: 1,
   },
   {
     id: 3,
@@ -24,6 +25,7 @@ const testTasks = [
     date: "2025-01-26",
     priority: "high",
     completed: false,
+    projectId: 1,
   },
   {
     id: 4,
@@ -40,17 +42,41 @@ const testTasks = [
     date: "2025-01-28",
     priority: "medium",
     completed: false,
+    projectId: 2,
   }
-]
+];
+
+const testProjects = [
+  {
+    id: 1,
+    title: "ABC Project",
+    description: "A software development project for a client in the healthcare industry. The project involves creating a web application for managing patient records, appointments, and billing.",
+  },
+  {
+    id: 2,
+    title: "XYZ Project",
+    description: "An e-commerce platform development project for a startup company. The project includes building a responsive website, integrating payment gateways, and implementing product search functionality.",
+  },
+  {
+    id: 3,
+    title: "123 Project",
+    description: "A marketing campaign project for a new product launch. The project involves creating promotional materials, social media campaigns, and tracking customer engagement.",
+  }
+];
 
 class Database {
   static DB_NAME = 'nxT-task-manager';
   static DB_VERSION = 1;
   static UPDATE_INTERVAL_IN_SEC = 30;
-  #unsavedChanges = {tasks: []};
-  #db
+  #unsavedChanges;
+  #db;
   
   constructor() {
+    this.#unsavedChanges = { 
+      tasks: [],
+      projects: [],
+    };
+
     this.#addEventListeners();
     this.#startPerodicDatabaseUpdate();
   }
@@ -115,10 +141,16 @@ class Database {
 
         if (!db.objectStoreNames.contains('tasks')) {
           const taskStore = db.createObjectStore('tasks', { keyPath: 'id', autoIncrement: true });
-          taskStore.createIndex('byPriority', 'priority', { unique: false });
           taskStore.createIndex('byDate', 'date', { unique: false });
+          taskStore.createIndex('byProjectId', 'projectId', { unique: false });
 
           testTasks.forEach((task) => taskStore.put(task)); // TEST ONLY!!!
+        }
+
+        if (!db.objectStoreNames.contains('projects')) {
+          const projectStore = db.createObjectStore('projects', { keyPath: 'id', autoIncrement: true });
+          
+          testProjects.forEach((project) => projectStore.put(project)); // TEST ONLY!!!
         }
       };
     });
