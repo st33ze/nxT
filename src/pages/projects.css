@@ -1,0 +1,25 @@
+.page-projects {
+  height: 100%;
+  animation-name: ease-in;
+  animation-duration: 1s;
+}
+.page-projects h1 {
+  font-size: var(--fs-500);
+  font-weight: var(--fw-bold);
+  text-align: center;
+}
+.add-btn {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease-in-out, visibility 0.25s ease-in-out;
+}
+.page-projects:has(.item-menu.open) {
+  .add-btn {
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out, visibility 0s linear 0.25s;
+    visibility: hidden;
+  }
+}
