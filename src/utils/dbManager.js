@@ -41,7 +41,7 @@ const testTasks = [
     description: "Design a professional and visually appealing slide deck for the team meeting scheduled for next week. Include updates on the current sprint, key challenges, and goals for the upcoming quarter.",
     date: "2025-01-28",
     priority: "medium",
-    completed: false,
+    completed: true,
     projectId: 2,
   }
 ];
@@ -49,7 +49,7 @@ const testTasks = [
 const testProjects = [
   {
     id: 1,
-    title: "ABC Project",
+    title: "To ensure that the title is vertically centered and to add ellipsis",
     description: "A software development project for a client in the healthcare industry. The project involves creating a web application for managing patient records, appointments, and billing.",
   },
   {
@@ -217,6 +217,29 @@ class Database {
       const store = this.#getObjectStore('tasks', 'readonly');
       const index = store.index('byDate');
       const range = IDBKeyRange.only(dateString);
+
+      const request = index.getAll(range);
+
+      request.onsuccess = (e) => {
+        resolve(e.target.result.filter(task => !task.deleted));
+      };
+
+      request.onerror = (e) => {
+        reject(e.target.error);
+      };
+    });
+  }
+
+  async getTasksByIndex(indexName, value) {
+    return new Promise((resolve, reject) => {
+      const store = this.#getObjectStore('tasks', 'readonly');
+
+      if (!store.indexNames.contains(indexName)) {
+        reject(new Error(`Index ${indexName} not found in tasks store`));
+      }
+      
+      const index = store.index(indexName);
+      const range = IDBKeyRange.only(value);
 
       const request = index.getAll(range);
 
