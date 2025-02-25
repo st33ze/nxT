@@ -1,6 +1,7 @@
 import './projectList.css';
 import { createNode } from '../../utils/domUtils.js';
 import { createSVGElement } from '../../assets/icons.js';
+import { calcProgress, sortByProgress } from '../../utils/projectUtils.js';
 
 class ProjectCard {
   static create(project) {
@@ -31,18 +32,19 @@ class ProjectCard {
     node.innerHTML = '';
     node.style.display = 'block';
 
-    const completedTasks = tasks.filter(task => task.completed).length;
-    node.parentElement.classList.toggle('project-completed', completedTasks === tasks.length);
+    const progress = calcProgress(tasks);
+    const projectCompleted = progress === 1;
+    node.parentElement.classList.toggle('project-completed', projectCompleted);
 
-    if (completedTasks === tasks.length) {
+    if (projectCompleted) {
       const completedIcon = createSVGElement('done');
       node.appendChild(completedIcon);
       node.setAttribute('aria-label', 'Project completed');
     } else {
       const innerCircle = createNode('div');
       node.appendChild(innerCircle);
-      innerCircle.style.setProperty('--progress', `${completedTasks / tasks.length * 100}`);
-      node.setAttribute('aria-label', `${completedTasks} of ${tasks.length} tasks completed`);
+      innerCircle.style.setProperty('--progress', `${progress * 100}`);
+      node.setAttribute('aria-label', `Project completed in ${progress * 100}%`);
     }
   }
 }
@@ -53,12 +55,10 @@ export default class ProjectList {
 
   constructor(projects = []) {
     this.#node = createNode('section', {class: 'project-list'});
-    this.#projects = projects;
-
+    this.#projects = sortByProgress(projects);
     projects.forEach((project) => {
       this.#node.appendChild(ProjectCard.create(project));
     });
-
   }
 
   get node() {
