@@ -1,0 +1,9 @@
+.contenteditable {
+  outline: none;
+  cursor: pointer;
+
+  &:empty:before {
+    content: attr(placeholder) '...';
+    color: hsl(var(--clr-secondary-500));
+  }
+}
