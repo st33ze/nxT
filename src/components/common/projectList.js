@@ -1,15 +1,16 @@
 import './projectList.css';
 import { createNode } from '../../utils/domUtils.js';
-import { createSVGElement } from '../../assets/icons.js';
-import { calcProgress, sortByProgress } from '../../utils/projectUtils.js';
+import { sortByProgress } from '../../utils/projectUtils.js';
+import ProgressIndicator from './ProgressIndicator.js';
 
 class ProjectCard {
   static create(project) {
     const card = createNode('article', {class: 'project-card'});
     
-    const title = createNode('h2', {class: 'project-title'});
-    const progress = createNode('div', {class: 'project-progress'});
-    card.append(title, progress);
+    card.append(
+      createNode('h2', {class: 'project-title'}),
+      ProgressIndicator.create()
+    );
     
     ProjectCard.update(card, project);
 
@@ -19,33 +20,11 @@ class ProjectCard {
   static update(card, project) {
     card.querySelector('.project-title').textContent = project.title;
 
-    const progressIndicator = card.querySelector('.project-progress');
-    ProjectCard.#updateProgressIndicatior(progressIndicator, project.tasks);
-  }
-
-  static #updateProgressIndicatior(node, tasks) {
-    if (tasks.length === 0) {
-      node.style.display = 'none';
-      return;
-    }
-    
-    node.innerHTML = '';
-    node.style.display = 'block';
-
-    const progress = calcProgress(tasks);
-    const projectCompleted = progress === 1;
-    node.parentElement.classList.toggle('project-completed', projectCompleted);
-
-    if (projectCompleted) {
-      const completedIcon = createSVGElement('done');
-      node.appendChild(completedIcon);
-      node.setAttribute('aria-label', 'Project completed');
-    } else {
-      const innerCircle = createNode('div');
-      node.appendChild(innerCircle);
-      innerCircle.style.setProperty('--progress', `${progress * 100}`);
-      node.setAttribute('aria-label', `Project completed in ${progress * 100}%`);
-    }
+    card.classList.toggle('no-tasks', project.tasks.length === 0);
+    ProgressIndicator.update(
+      card.querySelector('.project-progress'),
+      project.tasks
+    );
   }
 }
 
