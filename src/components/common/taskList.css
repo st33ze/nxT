@@ -22,9 +22,8 @@
 .task-list {
   --task-clr: transparent;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: grid;
+  row-gap: 0.25rem;
   list-style: none;
   padding: 0;
 }

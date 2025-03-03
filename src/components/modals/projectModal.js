@@ -3,11 +3,60 @@ import { createNode } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import { TaskList } from '../common/taskList.js';
+import ProgressIndicator from '../common/ProgressIndicator.js';
+
+class TaskSection {
+  #node;
+  #taskList;
+
+  constructor() {
+    this.#node = createNode('div', { class: 'task-section' });
+    
+    this.#node.appendChild(this.#createHeader());
+  }
+
+  #createHeader() {
+    const header = createNode('div', { class: 'task-section--header'} );
+    header.append(
+      createNode('h3'), 
+      createSVGElement('arrow'),
+      ProgressIndicator.create()
+    );
+    header.addEventListener('click', () => this.#node.classList.toggle('expanded'));
+    
+    return header;
+  }
+
+  #addTaskListListeners() {}
+
+  #updateHeader(tasks) {
+    const count = tasks.length;
+    this.#node.querySelector('h3').textContent = `${count} task${count === 1 ? '' : 's'}`;
+
+    ProgressIndicator.update(
+      this.#node.querySelector('.project-progress'),
+      tasks
+    )
+  }
+
+  renderTasks(tasks) {
+    this.#taskList?.node.remove();
+    this.#taskList = new TaskList(tasks);
+    this.#node.appendChild(this.#taskList.node);
+
+    this.#updateHeader(tasks);
+  }
+
+  get node() {
+    return this.#node;
+  }
+}
 
 export default class ProjectModal {
   #node;
   #inputs;
   #buttons;
+  #taskSection
 
   constructor() {
     this.#node = createNode('div', { class: 'project-modal' });
@@ -62,18 +111,14 @@ export default class ProjectModal {
     const textSection = createNode('section', {class: 'text-section'});
     const {title, description} = this.#inputs;
     textSection.append(title.node, description.node);
-    
+
+    this.#taskSection = new TaskSection();
+
     this.#node.append(
       textSection,
+      this.#taskSection.node,
       this.#createButtonPanel()
     );
-  }
-
-  #renderTaskList(tasks) {
-    // delete previous task list
-    const taskList = new TaskList(tasks);
-    const buttonPanel = this.#node.querySelector('.button-panel');
-    this.#node.insertBefore(taskList.node, buttonPanel);
   }
 
   render(project={}) {
@@ -85,7 +130,7 @@ export default class ProjectModal {
       this.#inputs[input].value = project[input];
     }
 
-    this.#renderTaskList(project.tasks);
+    this.#taskSection.renderTasks(project.tasks);
   }
 
   get node() {
