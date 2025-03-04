@@ -81,7 +81,11 @@ export default class Today {
     bus.on(
       EVENTS.TASK.SAVE, 
       (task) => {
-        if (task.id) this.#taskList.save(task);
+        if (task.id) {
+          task.date === this.#getTodayStringDate()
+            ? this.#taskList.save(task)
+            : this.#taskList.delete(task.id);
+        }
       },
       {clearOnReload: true}
     );
@@ -89,9 +93,8 @@ export default class Today {
     bus.on(
       EVENTS.DATABASE.TASK_ADDED, 
       (task) => {
-        const date = new Date(2025, 0, 24); // FOR TESTING ONLY
-        const dateString = date.toLocaleDateString('en-CA');
-        if (task.date === dateString) this.#taskList.save(task);
+        if (task.date === this.#getTodayStringDate()) 
+          this.#taskList.save(task);
       },
       {clearOnReload: true}
     );
@@ -104,9 +107,7 @@ export default class Today {
   }
 
   async #loadTasksFromDB() {
-    // const dateString = this.#getTodayStringDate();
-    const date = new Date(2025, 0, 24); // FOR TESTING ONLY
-    const dateString = date.toLocaleDateString('en-CA');
+    const dateString = this.#getTodayStringDate();
     const tasks = await db.getTasksByDate(dateString);
 
     return tasks;
