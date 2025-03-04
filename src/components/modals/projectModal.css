@@ -21,6 +21,9 @@
     border: 1px solid hsl(var(--bg-primary-500));
     border-radius: 0.5rem;
     
+    &:has(.task-list:empty) {
+      display: none;
+    }
     .task-list {
       height: 0;
       opacity: 0;
