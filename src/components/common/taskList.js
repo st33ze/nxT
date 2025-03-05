@@ -97,7 +97,7 @@ class ItemMenu {
 }
 
 class TaskListItem {
-  static #createCheckbox(isTaskCompleted) {
+  static #createCheckbox() {
     return createNode('input', {
       type: 'checkbox',
       name: 'is-task-completed',
@@ -105,7 +105,7 @@ class TaskListItem {
     });
   }
 
-  static #createTitle(title) {
+  static #createTitle() {
     return createNode('button', {
       class: 'li-task-title',
       'aria-haspopup': 'true',
@@ -113,28 +113,17 @@ class TaskListItem {
     });
   }
 
-  static #toggleCompletedState(li, isCompleted) {
-    li.classList.toggle('task-completed', isCompleted);
-  }
-
-  static #updateBorderColor(li, priority) {
-    const color = priority ? `hsl(var(--clr-prio-${priority}))`: 'transparent';
-    li.style.setProperty('--task-clr', color);
-  }
-
   static update(li, task) {
     if (task.completed != null) {
       const checkbox = li.querySelector('input[type="checkbox"]');
       checkbox.checked = task.completed;
-      TaskListItem.#toggleCompletedState(li, checkbox.checked);
+      li.classList.toggle('task-completed', task.completed);
     }
     if (task.title != null) {
       const titleBtn = li.querySelector('.li-task-title');
       titleBtn.textContent = task.title;
     }
-    if ('priority' in task) {
-      TaskListItem.#updateBorderColor(li, task.priority);
-    }
+    li.setAttribute('data-priority', task.priority ?? '');
   }
 
   static create(task) {
@@ -216,6 +205,7 @@ class TaskList {
     } else if (TaskListItem.isCheckbox(e.target)) {
       task.completed = e.target.checked;
       bus.emit(EVENTS.TASK.SAVE, task);
+      bus.emit(EVENTS.TASK.EDIT, task);
     }
   }
 
@@ -251,12 +241,9 @@ class TaskList {
       sortedTasks.forEach(task => {
         const li = idMappedItems.get(task.id);
         ul.appendChild(li);
-        li.style.transform = 'none';
-        li.style.position = 'relative';
-        li.style.top = '';
+        li.removeAttribute('style');
       });
-      ul.style.height = 'auto';
-      ul.style.pointerEvents = 'auto';
+      ul.removeAttribute('style');
     }, 500);
   }
 

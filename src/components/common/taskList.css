@@ -26,6 +26,15 @@
   row-gap: 0.25rem;
   list-style: none;
   padding: 0;
+  [data-priority='high'] {
+    --task-clr: hsl(var(--clr-prio-high));
+  }
+  [data-priority='medium'] {
+    --task-clr: hsl(var(--clr-prio-medium));
+  }
+  [data-priority='low'] {
+    --task-clr: hsl(var(--clr-prio-low));
+  }
 }
 .task-list li {
   position: relative;
