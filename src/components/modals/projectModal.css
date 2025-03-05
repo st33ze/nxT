@@ -55,9 +55,7 @@
     }
     .project-progress {
       margin-left: auto;
-      .inner-circle {
-        --color: hsl(var(--clr-prio-low));
-      }
+      --color: hsl(var(--clr-prio-low));
     }
   }
 

@@ -7,42 +7,6 @@ import bus, {EVENTS} from '../utils/bus.js';
 import Modal from '../components/modals/modal.js';
 import ProjectModal from '../components/modals/projectModal.js';
 
-const testProject = {
-  id: 1,
-  title: "To ensure that the title is vertically centered and to add ellipsis",
-  description: "A software development project for a client in the healthcare industry. The project involves creating a web application for managing patient records, appointments, and billing.",
-  tasks: [
-    {
-      id: 1,
-      title: "Finish project report",
-      description: "Complete the final detailed report for the ABC project, which includes financial data, project milestones, and lessons learned. Ensure the report is formatted properly and reviewed before submission to the management team.",
-      date: "2025-01-24",
-      priority: "high",
-      completed: false,
-      projectId: 1,
-    },
-    {
-      id: 2,
-      title: "Grocery shopping",
-      description: "Go to the local supermarket to buy fresh vegetables, seasonal fruits, dairy products, and other weekly essentials. Also, check for discounts on household items like cleaning supplies.",
-      date: "2025-01-25",
-      priority: "medium",
-      completed: true,
-      projectId: 1,
-    },
-    {
-      id: 3,
-      title: "Call with the client",
-      description: "Set up a one-hour video call with the client to discuss progress on the project milestones. Prepare a brief update presentation, including timelines, current challenges, and proposed solutions.",
-      date: "2025-01-26",
-      priority: "high",
-      completed: false,
-      projectId: 1,
-    },
-  ]
-}
-
-
 export default class Projects {
   #node;
   #projectList;
@@ -61,6 +25,7 @@ export default class Projects {
       content: new ProjectModal(),
     }
 
+    this.#addEventListeners();
     this.#node.append(pageContent, this.#modal.window.node);
 
     this.#loadProjectsFromDB().then((projects) => {
@@ -83,7 +48,6 @@ export default class Projects {
 
   #openModal(project={}) {
     this.#modal.content.render(project);
-    console.log(this.#modal.content);
     bus.emit(EVENTS.MODAL.OPEN, this.#modal.content.node);
     this.#node.querySelector('.projects-content').setAttribute('inert', '');
   }
@@ -100,6 +64,24 @@ export default class Projects {
     const content = this.#node.querySelector('.projects-content');
     content.removeAttribute('inert');
     content.querySelector('.add-btn').focus();
+  }
+
+  #addEventListeners() {
+    bus.on(
+      EVENTS.PROJECT_LIST.PROJECT_DETAILS, 
+      (id) => {
+        Promise.all([
+          db.getEntity('projects', id),
+          db.getTasksByIndex('byProjectId', id)
+        ]).then(([project, tasks]) => {
+          project.tasks = tasks;
+          this.#openModal(project);
+        }).catch(error => {
+          console.error('Error fetching project details', error);
+        });
+      },
+      {clearOnReload: true}
+    );
   }
 
   async #loadProjectsFromDB() {
