@@ -62,6 +62,7 @@ export const EVENTS = {
   TASK: {
     SAVE: 'task:save',
     DELETE: 'task:delete',
+    EDIT: 'task:edit',
   },
   DATABASE: {
     TASK_ADDED: 'database:taskAdded',

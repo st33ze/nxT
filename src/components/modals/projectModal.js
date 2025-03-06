@@ -4,15 +4,19 @@ import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import { TaskList } from '../common/taskList.js';
 import ProgressIndicator from '../common/ProgressIndicator.js';
+import bus, { EVENTS } from '../../utils/bus.js';
 
 class TaskSection {
   #node;
   #taskList;
+  #projectId
 
   constructor() {
     this.#node = createNode('div', { class: 'task-section' });
     
     this.#node.appendChild(this.#createHeader());
+
+    this.#addTaskListListeners();
   }
 
   #createHeader() {
@@ -22,14 +26,34 @@ class TaskSection {
       createSVGElement('arrow'),
       ProgressIndicator.create()
     );
-    header.addEventListener('click', () => this.#node.classList.toggle('expanded'));
+    header.addEventListener('click', () => {
+      this.#node.style.interpolateSize = 'allow-keywords';
+      this.#node.classList.toggle('expanded');
+      
+      this.#node.addEventListener('transitionend', () => {
+        this.#node.removeAttribute('style');
+      }, { once: true });
+
+    });
     
     return header;
   }
 
-  #addTaskListListeners() {}
+  #addTaskListListeners() {
+    bus.on(
+      EVENTS.TASK.EDIT,
+      (task) => {
+        if (task.projectId === this.#projectId) {
+          this.#taskList.save(task);
+        } else {
+          this.#taskList.delete(task.id);
+        }
+      },
+      {clearOnReload: true}
+    );
+  }
 
-  #updateHeader(tasks) {
+  #updateHeader(tasks=[]) {
     const count = tasks.length;
     this.#node.querySelector('h3').textContent = `${count} task${count === 1 ? '' : 's'}`;
 
@@ -39,7 +63,9 @@ class TaskSection {
     )
   }
 
-  renderTasks(tasks) {
+  renderTasks(tasks, projectId) {
+    this.#projectId = projectId;
+
     this.#taskList?.node.remove();
     this.#taskList = new TaskList(tasks);
     this.#node.appendChild(this.#taskList.node);
@@ -121,16 +147,20 @@ export default class ProjectModal {
     );
   }
 
-  render(project={}) {
-    const isNewProject = !project.hasOwnProperty('title');
+  #adjustButtons(isNewProject) {
     this.#buttons.save.disabled = isNewProject;
     this.#buttons.delete.style.display = isNewProject ? 'none': 'block';
+    this.#buttons.addTask.style.display = isNewProject ? 'none': 'block';
+  }
+
+  render(project={}) {
+    this.#adjustButtons(!project.hasOwnProperty('title'));
 
     for (const input in this.#inputs) {
       this.#inputs[input].value = project[input];
     }
 
-    this.#taskSection.renderTasks(project.tasks);
+    this.#taskSection.renderTasks(project.tasks, project.id);
   }
 
   get node() {
