@@ -1,6 +1,6 @@
-function calcProgress(tasks) {
-  const completedTasks = tasks.filter(task => task.completed).length;
-  return completedTasks / tasks.length;
+function calcProgress(completionStates) {
+  const completedTasks = completionStates.filter(state => state === true).length;
+  return completedTasks / completionStates.length;
 }
 
 function getOrderNumber(tasks) {

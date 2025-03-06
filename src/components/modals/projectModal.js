@@ -14,7 +14,9 @@ class TaskSection {
   constructor() {
     this.#node = createNode('div', { class: 'task-section' });
     
-    this.#node.appendChild(this.#createHeader());
+    this.#taskList = new TaskList();
+
+    this.#node.append(this.#createHeader(), this.#taskList.node);
 
     this.#addTaskListListeners();
   }
@@ -48,29 +50,30 @@ class TaskSection {
         } else {
           this.#taskList.delete(task.id);
         }
+        this.#updateHeader();
       },
       {clearOnReload: true}
     );
   }
 
-  #updateHeader(tasks=[]) {
-    const count = tasks.length;
+  #updateHeader() {
+    const completionList = this.#taskList.getCompletionList();
+
+    const count = completionList.length;
     this.#node.querySelector('h3').textContent = `${count} task${count === 1 ? '' : 's'}`;
 
     ProgressIndicator.update(
       this.#node.querySelector('.project-progress'),
-      tasks
-    )
+      completionList
+    );
   }
 
   renderTasks(tasks, projectId) {
     this.#projectId = projectId;
 
-    this.#taskList?.node.remove();
-    this.#taskList = new TaskList(tasks);
-    this.#node.appendChild(this.#taskList.node);
+    this.#taskList.render(tasks);
 
-    this.#updateHeader(tasks);
+    this.#updateHeader();
   }
 
   get node() {

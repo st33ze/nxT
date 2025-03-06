@@ -15,8 +15,8 @@ export default class ProgressIndicator {
     return indicator;
   }
 
-  static update(node, tasks) {
-    const progress = calcProgress(tasks);
+  static update(node, completionList) {
+    const progress = calcProgress(completionList);
     const projectCompleted = progress === 1;
     node.classList.toggle('project-completed', projectCompleted);
 

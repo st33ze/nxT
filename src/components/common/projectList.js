@@ -27,7 +27,7 @@ class ProjectCard {
     card.classList.toggle('no-tasks', project.tasks.length === 0);
     ProgressIndicator.update(
       card.querySelector('.project-progress'),
-      project.tasks
+      project.tasks.map(task => task.completed)
     );
   }
 }

@@ -259,6 +259,10 @@ class TaskList {
     this.#node.replaceChildren(fragment);
   }
 
+  getCompletionList() {
+    return [...this.#tasks.values()].map(task => task.completed);
+  }
+
   delete(taskId) {
     if (!this.#tasks.has(taskId)) return;
 
