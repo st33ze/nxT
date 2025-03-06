@@ -165,14 +165,10 @@ class TaskList {
   #node
   #tasks
 
-  constructor(tasks=[]) {
+  constructor(tasks) {
     this.#node = createNode('ul', {class: 'task-list'});
 
-    this.#tasks = new Map(tasks.map(task => [task.id, task]));
-    taskUtils.sortByPriority(tasks)
-      .forEach(task => {
-        this.#node.appendChild(TaskListItem.create(task));
-      });
+    this.render(tasks);
 
     this.#node.addEventListener('click', this.#handleClickEvent);
   }
@@ -249,6 +245,18 @@ class TaskList {
 
   #findListItem(id) {
     return this.#node.querySelector(`:scope > [data-task-id='${id}']`);
+  }
+
+  render(tasks=[]) {
+    this.#tasks = new Map(tasks.map(task => [task.id, task]));
+
+    const fragment = document.createDocumentFragment();
+    taskUtils.sortByPriority(tasks)
+      .forEach(task => {
+        fragment.appendChild(TaskListItem.create(task));
+      });
+
+    this.#node.replaceChildren(fragment);
   }
 
   delete(taskId) {
