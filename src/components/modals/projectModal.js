@@ -5,6 +5,7 @@ import { createSVGElement } from '../../assets/icons.js';
 import { TaskList } from '../common/taskList.js';
 import ProgressIndicator from '../common/ProgressIndicator.js';
 import bus, { EVENTS } from '../../utils/bus.js';
+import { calcProgress } from '../../utils/projectUtils.js';
 
 class TaskSection {
   #node;
@@ -37,8 +38,29 @@ class TaskSection {
       }, { once: true });
 
     });
-    
     return header;
+  }
+
+  #updateHeader(taskCount, projectProgress) {
+    const headerText = `${taskCount} task${taskCount === 1 ? '': 's'}`;
+    this.#node.querySelector('h3').textContent = headerText;
+
+    ProgressIndicator.update(
+      this.#node.querySelector('.project-progress'),
+      projectProgress
+    );
+  }
+
+  #handleTaskListChange() {
+    const completionList = this.#taskList.getCompletionList();
+    const progress = completionList.length ? calcProgress(completionList): null;    
+    
+    this.#updateHeader(completionList.length, progress);
+
+    bus.emit(
+      EVENTS.PROJECT_MODAL.PROGRESS_CHANGE,
+      {id: this.#projectId, progress}
+    );
   }
 
   #addTaskListListeners() {
@@ -50,30 +72,22 @@ class TaskSection {
         } else {
           this.#taskList.delete(task.id);
         }
-        this.#updateHeader();
+        this.#handleTaskListChange();
       },
       {clearOnReload: true}
     );
   }
 
-  #updateHeader() {
-    const completionList = this.#taskList.getCompletionList();
-
-    const count = completionList.length;
-    this.#node.querySelector('h3').textContent = `${count} task${count === 1 ? '' : 's'}`;
-
-    ProgressIndicator.update(
-      this.#node.querySelector('.project-progress'),
-      completionList
-    );
-  }
 
   renderTasks(tasks, projectId) {
     this.#projectId = projectId;
 
     this.#taskList.render(tasks);
 
-    this.#updateHeader();
+    this.#updateHeader(
+      tasks.length,
+      calcProgress(tasks.map(task => task.completed))
+    );
   }
 
   get node() {

@@ -56,13 +56,16 @@ export const EVENTS = {
     MENU_CLOSE: 'tasksList:menuClose',
     TASK_DETAILS: 'taskList:taskDetails',
   },
-  PROJECT_LIST: {
-    PROJECT_DETAILS: 'projectList:projectDetails',
-  },
   TASK: {
     SAVE: 'task:save',
     DELETE: 'task:delete',
     EDIT: 'task:edit',
+  },
+  PROJECT_LIST: {
+    PROJECT_DETAILS: 'projectList:projectDetails',
+  },
+  PROJECT_MODAL: {
+    PROGRESS_CHANGE: 'projectModal:progressChange',
   },
   DATABASE: {
     TASK_ADDED: 'database:taskAdded',

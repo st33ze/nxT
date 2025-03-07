@@ -82,6 +82,12 @@ export default class Projects {
       },
       {clearOnReload: true}
     );
+
+    bus.on(
+      EVENTS.PROJECT_MODAL.PROGRESS_CHANGE,
+      (project) => this.#projectList.update(project),
+      {clearOnReload: true}
+    )
   }
 
   async #loadProjectsFromDB() {
