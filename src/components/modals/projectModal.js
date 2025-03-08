@@ -86,16 +86,17 @@ class TaskSection {
     )
   }
 
-
   renderTasks(tasks, projectId) {
     this.#projectId = projectId;
 
     this.#taskList.render(tasks);
 
-    this.#updateHeader(
-      tasks.length,
-      calcProgress(tasks.map(task => task.completed))
-    );
+    if (tasks) {
+      this.#updateHeader(
+        tasks.length,
+        calcProgress(tasks.map(task => task.completed))
+      );
+    }
   }
 
   get node() {
