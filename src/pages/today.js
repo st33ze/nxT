@@ -108,7 +108,7 @@ export default class Today {
 
   async #loadTasksFromDB() {
     const dateString = this.#getTodayStringDate();
-    const tasks = await db.getTasksByDate(dateString);
+    const tasks = await db.getTasksByIndex('byDate', dateString);
 
     return tasks;
   }
