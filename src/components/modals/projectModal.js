@@ -76,6 +76,14 @@ class TaskSection {
       },
       {clearOnReload: true}
     );
+    
+    bus.on(
+        EVENTS.TASK.DELETE,
+        (id) => {
+          this.#taskList.delete(id);
+          this.#handleTaskListChange();
+        }
+    )
   }
 
 
