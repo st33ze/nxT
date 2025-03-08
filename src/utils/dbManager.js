@@ -244,8 +244,8 @@ class Database {
       const request = index.getAll(range);
 
       request.onsuccess = (e) => {
-        const tasks = e.target.result.filter(task => !task.deleted);
-        resolve(this.#updateWithPendingChanges(tasks, 'tasks'));
+        const updatedTasks = this.#updateWithPendingChanges(e.target.result, 'tasks');
+        resolve(updatedTasks.filter(task => !task.deleted));
       };
 
       request.onerror = (e) => {
@@ -260,8 +260,8 @@ class Database {
       const request = store.getAll();
 
       request.onsuccess = (e) => {
-        const tasks = e.target.result.filter(task => !task.deleted);
-        resolve(this.#updateWithPendingChanges(tasks, storeName));
+        const updatedItems = this.#updateWithPendingChanges(e.target.result, storeName);
+        resolve(updatedItems.filter(item => !item.deleted));
       }
       request.onerror = (e) => {
         console.error(`Error while getting items from store: ${storeName}`, e.target.error);
