@@ -1,5 +1,5 @@
 import './taskModal.css';
-import { createNode } from '../../utils/domUtils.js';
+import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, { EVENTS } from '../../utils/bus.js';
 
@@ -443,10 +443,6 @@ export default class TaskModal {
     );
   }
 
-  static #normalizeValue(value) {
-    return typeof value === 'string' && value.trim() === '' ? null: value;
-  }
-
   /**
    * Creates the input elements for the modal.
    * @returns {Object} - An object containing all input elements.
@@ -544,7 +540,7 @@ export default class TaskModal {
   get task() {
     const currentValues = {};
     for (const key in this.#inputs) {
-      currentValues[key] = TaskModal.#normalizeValue(this.#inputs[key].value);
+      currentValues[key] = normalizeInputValue(this.#inputs[key].value);
     }
     return {...this.#initalValues, ...currentValues};
   }
