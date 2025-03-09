@@ -82,7 +82,8 @@ class TaskSection {
         (id) => {
           this.#taskList.delete(id);
           this.#handleTaskListChange();
-        }
+        },
+        {clearOnReload: true}
     )
   }
 
