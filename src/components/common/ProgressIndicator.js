@@ -1,7 +1,6 @@
 import './ProgressIndicator.css';
 import { createNode } from '../../utils/domUtils';
 import { createSVGElement } from '../../assets/icons';
-import { calcProgress } from '../../utils/projectUtils';
 
 export default class ProgressIndicator {
   static create() {

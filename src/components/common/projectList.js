@@ -16,9 +16,6 @@ class ProjectCard {
       ProgressIndicator.create()
     );
     
-    project.progress = project.tasks.length
-      ? calcProgress(project.tasks.map(task => task.completed))
-      : null;
     ProjectCard.update(card, project);
 
     return card;
@@ -39,20 +36,26 @@ class ProjectCard {
 
 export default class ProjectList {
   #node;
-  #projects
 
   constructor(projects = []) {
     this.#node = createNode('section', {class: 'project-list'});
 
-    // To be checked if map is really needed here
-    this.#projects = new Map(projects.map(project => [project.id, project]));
+    this.#setProgress(projects);
     
     sortByProgress(projects)
-      .forEach((project) => {
-        this.#node.appendChild(ProjectCard.create(project));
-      });
-
+    .forEach((project) => {
+      this.#node.appendChild(ProjectCard.create(project));
+    });
+    
     this.#node.addEventListener('click', this.#handleClickEvent);
+  }
+  
+  #setProgress(projects) {
+    projects.forEach(project => {
+      project.progress = !project.tasks?.length 
+        ? null
+        : calcProgress(project.tasks.map(task => task.completed)); 
+    });
   }
 
   #handleClickEvent = (e) => {

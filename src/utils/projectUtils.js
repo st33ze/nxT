@@ -3,15 +3,15 @@ function calcProgress(completionStates) {
   return completedTasks / completionStates.length;
 }
 
-function getOrderNumber(tasks) {
-  if (tasks.length === 0) {
-    return -1;
-  }
-  return calcProgress(tasks);
+function getOrderNumber(progress) {
+  if (progress == null) return -1;
+  return progress;
 }
 
 function sortByProgress(projects) {
-  return projects.sort((a, b) => getOrderNumber(a.tasks) - getOrderNumber(b.tasks));
+  return projects.sort((a, b) => {
+    return getOrderNumber(a.progress) - getOrderNumber(b.progress);
+  });
 }
 
 export { calcProgress, sortByProgress };
