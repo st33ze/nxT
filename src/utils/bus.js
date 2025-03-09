@@ -61,6 +61,10 @@ export const EVENTS = {
     DELETE: 'task:delete',
     EDIT: 'task:edit',
   },
+  PROJECT: {
+    CREATE: 'project:create',
+    EDIT: 'project:edit',
+  },
   PROJECT_LIST: {
     PROJECT_DETAILS: 'projectList:projectDetails',
   },
@@ -69,6 +73,7 @@ export const EVENTS = {
   },
   DATABASE: {
     TASK_ADDED: 'database:taskAdded',
+    PROJECT_ADDED: 'database:projectAdded',
   }
 }
 

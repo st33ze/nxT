@@ -100,6 +100,12 @@ class Database {
       }
     });
     
+    bus.on(EVENTS.PROJECT.CREATE, async (project) => {
+      this.#save('projects', project).then((result) => {
+        bus.emit(EVENTS.DATABASE.PROJECT_ADDED, result[0]);
+      });
+    });
+
     bus.on(EVENTS.PAGE.NAVIGATE, () => this.savePendingChanges());
   }
 

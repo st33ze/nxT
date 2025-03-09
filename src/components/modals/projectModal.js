@@ -1,5 +1,5 @@
 import './projectModal.css';
-import { createNode } from '../../utils/domUtils.js';
+import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import { TaskList } from '../common/taskList.js';
@@ -108,7 +108,8 @@ export default class ProjectModal {
   #node;
   #inputs;
   #buttons;
-  #taskSection
+  #taskSection;
+  #id;
 
   constructor() {
     this.#node = createNode('div', { class: 'project-modal' });
@@ -131,6 +132,10 @@ export default class ProjectModal {
     this.#inputs = {title, description};
   }
 
+  #isProjectNew() {
+    return !this.#id;
+  }
+
   #createButtonPanel() {
     const buttonPanel = createNode('div', { class: 'button-panel' });
     
@@ -139,6 +144,14 @@ export default class ProjectModal {
       disabled: true,
     });
     saveBtn.textContent = 'Save';
+    saveBtn.addEventListener('click', () => {
+      if (this.#isProjectNew()) {
+        bus.emit(EVENTS.PROJECT.CREATE, this.project);
+      } else {
+        bus.emit(EVENTS.PROJECT.EDIT, this.project);
+      }
+
+    });
 
     const deleteBtn = createNode('button', { 
       class: 'delete-btn',
@@ -173,20 +186,31 @@ export default class ProjectModal {
     );
   }
 
-  #adjustButtons(isNewProject) {
-    this.#buttons.save.disabled = isNewProject;
-    this.#buttons.delete.style.display = isNewProject ? 'none': 'block';
-    this.#buttons.addTask.style.display = isNewProject ? 'none': 'block';
+  #adjustButtons(isProjectNew) {
+    this.#buttons.save.disabled = isProjectNew;
+    this.#buttons.delete.style.display = isProjectNew ? 'none': 'block';
+    this.#buttons.addTask.style.display = isProjectNew ? 'none': 'block';
   }
 
   render(project={}) {
-    this.#adjustButtons(!project.hasOwnProperty('title'));
+    this.#id = project.id;
+    this.#adjustButtons(this.#isProjectNew());
 
     for (const input in this.#inputs) {
       this.#inputs[input].value = project[input];
     }
 
     this.#taskSection.renderTasks(project.tasks, project.id);
+  }
+
+  get project() {
+    const project = {};
+    for (const key in this.#inputs) {
+      project[key] = normalizeInputValue(this.#inputs[key].value);
+    }
+    if (this.#id) project.id = this.#id;
+
+    return project;
   }
 
   get node() {
