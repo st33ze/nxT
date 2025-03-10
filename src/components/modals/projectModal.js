@@ -151,7 +151,7 @@ export default class ProjectModal {
       } else {
         bus.emit(EVENTS.PROJECT.EDIT, this.project);
       }
-
+      bus.emit(EVENTS.MODAL.CLOSE);
     });
 
     const deleteBtn = createNode('button', { 
