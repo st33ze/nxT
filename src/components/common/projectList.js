@@ -72,14 +72,13 @@ export default class ProjectList {
 
   save(project) {
     const currentProject = this.#projects.get(project.id);
-    this.#projects.set(project.id, { ...(currentProject ?? {}), ...project});
+    this.#projects.set(project.id, { ...(currentProject ?? {}), ...project });
 
     if(currentProject) {
-      ProjectCard.update(this.#findCard(project.id), currentProject);
+      ProjectCard.update(this.#findCard(project.id), project);
     } else {
       this.#node.appendChild(ProjectCard.create(project));
     }
-
   }
 
   get node() {
