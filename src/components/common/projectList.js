@@ -36,28 +36,27 @@ class ProjectCard {
 
 export default class ProjectList {
   #node;
+  #projects;
 
   constructor(projects = []) {
     this.#node = createNode('section', {class: 'project-list'});
+    this.#projects = new Map();
 
-    this.#setProgress(projects);
+    projects.forEach(project => {
+      if (project.tasks?.length) {
+        project.progress = calcProgress(project.tasks.map(task => task.completed));
+      }
+    });
     
     sortByProgress(projects)
     .forEach((project) => {
+      this.#projects.set(project.id, project);
       this.#node.appendChild(ProjectCard.create(project));
     });
     
     this.#node.addEventListener('click', this.#handleClickEvent);
   }
   
-  #setProgress(projects) {
-    projects.forEach(project => {
-      project.progress = !project.tasks?.length 
-        ? null
-        : calcProgress(project.tasks.map(task => task.completed)); 
-    });
-  }
-
   #handleClickEvent = (e) => {
     const projectItem = e.target.closest('article');
     if (!projectItem) return;
@@ -71,8 +70,16 @@ export default class ProjectList {
     return this.#node.querySelector(`:scope > [data-project-id='${id}']`);
   }
 
-  update(project) {
-    ProjectCard.update(this.#findCard(project.id), project);
+  save(project) {
+    const currentProject = this.#projects.get(project.id);
+    this.#projects.set(project.id, { ...(currentProject ?? {}), ...project});
+
+    if(currentProject) {
+      ProjectCard.update(this.#findCard(project.id), currentProject);
+    } else {
+      this.#node.appendChild(ProjectCard.create(project));
+    }
+
   }
 
   get node() {
