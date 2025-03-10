@@ -16,11 +16,6 @@
   visibility: visible;
   transition: opacity 0.25s ease-in-out, visibility 0.25s ease-in-out;
 }
-.projects-content {
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
-}
 .page-projects:has(.item-menu.open) {
   .add-btn {
     opacity: 0;
