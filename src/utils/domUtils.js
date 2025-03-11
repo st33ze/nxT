@@ -22,6 +22,7 @@ export function updatePositions(list, sortedIds) {
   const lRect = list.getBoundingClientRect();
 
   list.style.height = lRect.height + 'px';
+  list.style.position = 'relative';
 
   const posValues = items.map(item => {
     const rect = item.getBoundingClientRect();
