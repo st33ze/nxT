@@ -159,6 +159,10 @@ export default class ProjectModal {
       'aria-label': 'Delete project',
     });
     deleteBtn.appendChild(createSVGElement('delete'));
+    deleteBtn.addEventListener('click', () => {
+      bus.emit(EVENTS.PROJECT.DELETE, this.project.id);
+      bus.emit(EVENTS.MODAL.CLOSE);
+    });
 
     const addTaskBtn = createNode('button', {
       class: 'add-task--btn',

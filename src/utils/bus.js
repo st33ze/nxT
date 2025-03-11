@@ -64,6 +64,7 @@ export const EVENTS = {
   PROJECT: {
     CREATE: 'project:create',
     EDIT: 'project:edit',
+    DELETE: 'project:delete',
   },
   PROJECT_LIST: {
     PROJECT_DETAILS: 'projectList:projectDetails',

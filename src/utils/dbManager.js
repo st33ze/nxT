@@ -106,6 +106,14 @@ class Database {
       });
     });
 
+    bus.on(EVENTS.PROJECT.DELETE, async (id) => {
+      const project = await this.getEntity('projects', id);
+      if (project) {
+        project.deleted = true;
+        this.#unsavedChanges.projects.set(id, project);
+      }
+    });
+
     bus.on(EVENTS.PAGE.NAVIGATE, () => this.savePendingChanges());
   }
 
