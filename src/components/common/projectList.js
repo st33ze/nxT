@@ -87,6 +87,12 @@ export default class ProjectList {
     );
   }
 
+  delete(id) {
+    if (this.#projects.delete(id)) {
+      this.#findCard(id).remove();
+    }
+  }
+
   get node() {
     return this.#node;
   }

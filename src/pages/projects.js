@@ -94,6 +94,12 @@ export default class Projects {
       (project) => this.#projectList.save(project),
       {clearOnReload: true}
     );
+
+    bus.on(
+      EVENTS.PROJECT.DELETE,
+      (id) => this.#projectList.delete(id),
+      {clearOnReload: true}
+    );
   }
 
   async #loadProjectsFromDB() {
