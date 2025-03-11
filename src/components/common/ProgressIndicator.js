@@ -15,10 +15,10 @@ export default class ProgressIndicator {
   }
 
   static update(node, progress) {
-    if (progress == null) return;
-    
     const projectCompleted = progress === 1;
     node.classList.toggle('project-completed', projectCompleted);
+    
+    if (progress == null) return;
 
     node.querySelector('.inner-circle')
       .style.setProperty('--progress', `${progress * 100}`);
