@@ -1,5 +1,5 @@
 import './taskList.css';
-import { createNode } from '../../utils/domUtils.js';
+import { createNode, updatePositions } from '../../utils/domUtils.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, {EVENTS} from '../../utils/bus.js';
 import * as taskUtils from '../../utils/taskUtils.js';
@@ -205,44 +205,6 @@ class TaskList {
     }
   }
 
-  #updatePositions() {
-    const ul = this.#node;
-    ul.style.pointerEvents = 'none';
-    const items = Array.from(ul.children);
-    const ulRect = ul.getBoundingClientRect();
-    
-    ul.style.height = ulRect.height + 'px';
-    
-    const topValues = items.map(item => {
-      const rect = item.getBoundingClientRect();
-      return rect.top - ulRect.top;
-    });
-    
-    items.forEach((item, index) => {
-      item.style.position = "absolute";
-      item.style.top = `${topValues[index]}px`;
-    });
-
-    const sortedTasks = taskUtils.sortByPriority(Array.from(this.#tasks.values()));
-    const idMappedItems = new Map(
-      items.map(item => [Number(item.getAttribute('data-task-id')), item])
-    );
-    sortedTasks.forEach((task, index) => {
-      const li = idMappedItems.get(task.id);
-      const top = li.getBoundingClientRect().top - ulRect.top;
-      li.style.transform = `translateY(${topValues[index] - top}px)`;
-    });
-
-    setTimeout(() => {
-      sortedTasks.forEach(task => {
-        const li = idMappedItems.get(task.id);
-        ul.appendChild(li);
-        li.removeAttribute('style');
-      });
-      ul.removeAttribute('style');
-    }, 500);
-  }
-
   #findListItem(id) {
     return this.#node.querySelector(`:scope > [data-task-id='${id}']`);
   }
@@ -277,7 +239,12 @@ class TaskList {
       this.#node.appendChild(TaskListItem.create(task));
     }
     this.#tasks.set(task.id, task);
-    this.#updatePositions();
+    
+    updatePositions(
+      this.#node, 
+      taskUtils.sortByPriority(Array.from(this.#tasks.values()))
+        .map(task => task.id)
+    );
   }
 
   has(id) {
