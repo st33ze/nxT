@@ -225,11 +225,10 @@ class TaskList {
     return [...this.#tasks.values()].map(task => task.completed);
   }
 
-  delete(taskId) {
-    if (!this.#tasks.has(taskId)) return;
-
-    this.#tasks.delete(taskId);
-    this.#findListItem(taskId).remove();
+  delete(id) {
+    if (this.#tasks.delete(id)) {
+      this.#findListItem(id).remove();
+    }
   }
 
   save(task) {
