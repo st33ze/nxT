@@ -1,5 +1,5 @@
 import './projectList.css';
-import { createNode } from '../../utils/domUtils.js';
+import { createNode, updatePositions } from '../../utils/domUtils.js';
 import { calcProgress, sortByProgress } from '../../utils/projectUtils.js';
 import ProgressIndicator from './ProgressIndicator.js';
 import bus, { EVENTS } from '../../utils/bus.js';
@@ -79,6 +79,12 @@ export default class ProjectList {
     } else {
       this.#node.appendChild(ProjectCard.create(project));
     }
+
+    updatePositions(
+      this.#node,
+      sortByProgress(Array.from(this.#projects.values()))
+        .map(project => project.id)
+    );
   }
 
   get node() {
