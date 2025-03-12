@@ -106,6 +106,10 @@ class Database {
       });
     });
 
+    bus.on(EVENTS.PROJECT.EDIT, async (project) => {
+      this.#unsavedChanges.projects.set(project.id, project);
+    });
+
     bus.on(EVENTS.PROJECT.DELETE, async (id) => {
       const project = await this.getEntity('projects', id);
       if (project) {
