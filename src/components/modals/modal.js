@@ -5,56 +5,64 @@ import bus, { EVENTS } from '../../utils/bus.js';
 
 export default class Modal {
   #node
-  #closeBtn
-  #contentContainer
 
-  constructor(onCloseCallback) {
+  constructor() {
     this.#node = createNode('div', {
       'class': 'modal',
       'aria-hidden': 'true',
     });
-    this.onCloseCallback = onCloseCallback;
     
-    this.#render();
-  }
-  
-  #addEventListeners() {
-    bus.on(EVENTS.MODAL.OPEN, (content) => this.#open(content), {clearOnReload: true});
-    bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
-  }
-
-  #render() {
-    const modalWindow = createNode('div', {'class': 'modal-window'});
-
-    this.#closeBtn = createNode('button', {'aria-label': 'Close'});
-    this.#closeBtn.appendChild(createSVGElement('close'));
-    this.#closeBtn.addEventListener('click', () => this.#close());
-
-    this.#contentContainer = createNode('div', {'class': 'modal-content'});
+    this.#init();
 
     this.#addEventListeners();
+  }
+  
+  #createCloseBtn() {
+    const btn = createNode('button', {
+      class: 'close-btn',
+      'aria-label': 'Close',
+    });
+    btn.appendChild(createSVGElement('close'));
 
-    modalWindow.append(this.#closeBtn, this.#contentContainer);
+    btn.addEventListener('click', () => this.#close());
 
+    return btn;
+  }
+  
+  #init() {
+    const modalWindow = createNode('div', {class: 'modal-window'});
+
+    modalWindow.append(
+      this.#createCloseBtn(),
+      createNode('div', {class: 'modal-content'})
+    );
+    
     this.#node.appendChild(modalWindow);
   }
-
+  
   #open(contentNode) {
-    this.#contentContainer.appendChild(contentNode);
+    this.#node.querySelector('.modal-content')
+      .appendChild(contentNode);
+
     this.#node.classList.add('modal-open');
     this.#node.setAttribute('aria-hidden', 'false');
-    this.#closeBtn.focus();
+    
+    this.#node.querySelector('.close-btn').focus();
   }
   
   #close() {
     this.#node.classList.add('modal-closing');
     this.#node.setAttribute('aria-hidden', 'true');
-
+    
     setTimeout(() => {
       this.#node.classList.remove('modal-open', 'modal-closing');
-      this.#contentContainer.innerHTML = '';
-      this.onCloseCallback();
+      this.#node.querySelector('.modal-content').innerHTML = '';
     }, 500);
+  }
+  
+  #addEventListeners() {
+    bus.on(EVENTS.MODAL.OPEN, (content) => this.#open(content), {clearOnReload: true});
+    bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
   }
   
   get node() {
