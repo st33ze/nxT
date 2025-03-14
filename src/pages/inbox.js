@@ -22,7 +22,7 @@ export default class Inbox {
     pageContent.append(header, this.newTaskBtn);
 
     this.#modalContent = new TaskModal();
-    this.#modal = new Modal(() => this.#onModalClose());
+    this.#modal = new Modal();
 
     this.#addEventListeners();
     this.#node.append(pageContent, this.#modal.node);
@@ -46,6 +46,12 @@ export default class Inbox {
     this.#modalContent.render(task);
     bus.emit(EVENTS.MODAL.OPEN, this.#modalContent.node);
     this.#node.querySelector('.inbox-content').setAttribute('inert', '');
+
+    bus.on(
+      EVENTS.MODAL.CLOSE, 
+      () => this.#onModalClose(),
+      {clearOnReload: true, once: true}
+    );
   }
 
   #createNewTaskBtn() {

@@ -22,7 +22,7 @@ export default class Today {
     pageContent.append(header, newTaskBtn);
 
     this.#modalContent = new TaskModal();
-    this.#modal = new Modal(() => this.#onModalClose());
+    this.#modal = new Modal();
 
     this.#addEventListeners();
     this.#node.append(pageContent, this.#modal.node);
@@ -54,6 +54,12 @@ export default class Today {
     this.#modalContent.render(task);
     bus.emit(EVENTS.MODAL.OPEN, this.#modalContent.node);
     this.#node.querySelector('.today-content').setAttribute('inert', '');
+
+    bus.on(
+      EVENTS.MODAL.CLOSE, 
+      () => this.#onModalClose(),
+      {clearOnReload: true, once: true}
+    );
   }
 
   #createNewTaskBtn() {

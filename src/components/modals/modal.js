@@ -27,7 +27,7 @@ export default class Modal {
     });
     btn.appendChild(createSVGElement('close'));
 
-    btn.addEventListener('click', () => this.#close());
+    btn.addEventListener('click', () => bus.emit(EVENTS.MODAL.CLOSE));
 
     return btn;
   }

@@ -21,7 +21,7 @@ export default class Projects {
     pageContent.append(header, newProjectBtn);
 
     this.#modal = {
-      window: new Modal(this.#onModalClose.bind(this)),
+      window: new Modal(),
       content: new ProjectModal(),
     }
 
@@ -50,6 +50,12 @@ export default class Projects {
     this.#modal.content.render(project);
     bus.emit(EVENTS.MODAL.OPEN, this.#modal.content.node);
     this.#node.querySelector('.projects-content').setAttribute('inert', '');
+
+    bus.on(
+      EVENTS.MODAL.CLOSE, 
+      () => this.#onModalClose(),
+      {clearOnReload: true, once: true}
+    );
   }
 
   #createNewProjectBtn() {
@@ -61,9 +67,9 @@ export default class Projects {
   }
 
   #onModalClose() {
-    const content = this.#node.querySelector('.projects-content');
-    content.removeAttribute('inert');
-    content.querySelector('.add-btn').focus();
+    const pageContent = this.#node.querySelector('.projects-content');
+    pageContent.removeAttribute('inert');
+    pageContent.querySelector('.add-btn').focus();
   }
 
   #addEventListeners() {
