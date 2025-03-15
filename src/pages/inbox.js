@@ -17,12 +17,10 @@ export default class Inbox {
     this.#node = createNode('div', {'class': 'page-inbox'});
 
     const pageContent = createNode('div', {class: 'inbox-content'});
-    const header = this.#createHeader();
-    this.newTaskBtn =this.#createNewTaskBtn().node;
-    pageContent.append(header, this.newTaskBtn);
 
     this.#modalContent = new TaskModal();
     this.#modal = new Modal();
+    pageContent.append(this.#createHeader(), this.#createNewTaskBtn());
 
     this.#addEventListeners();
     this.#node.append(pageContent, this.#modal.node);

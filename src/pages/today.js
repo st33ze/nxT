@@ -17,12 +17,10 @@ export default class Today {
     this.#node = createNode('div', {'class': 'page-today'});
 
     const pageContent = createNode('div', {class: 'today-content'});
-    const header = this.#createHeader();
-    const newTaskBtn = this.#createNewTaskBtn().node;
-    pageContent.append(header, newTaskBtn);
 
     this.#modalContent = new TaskModal();
     this.#modal = new Modal();
+    pageContent.append(this.#createHeader(), this.#createNewTaskBtn());
 
     this.#addEventListeners();
     this.#node.append(pageContent, this.#modal.node);

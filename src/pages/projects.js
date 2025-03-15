@@ -16,14 +16,12 @@ export default class Projects {
     this.#node = createNode('div', {'class': 'page-projects'});
     
     const pageContent = createNode('div', {class: 'projects-content'});
-    const header = this.#createHeader();
-    const newProjectBtn = this.#createNewProjectBtn().node;
-    pageContent.append(header, newProjectBtn);
 
     this.#modal = {
       window: new Modal(),
       content: new ProjectModal(),
     }
+    pageContent.append(this.#createHeader(), this.#createNewProjectBtn());
 
     this.#addEventListeners();
     this.#node.append(pageContent, this.#modal.window.node);
