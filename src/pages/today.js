@@ -1,29 +1,23 @@
 import './today.css';
 import { createNode } from '../utils/domUtils.js';
 import AddButton from '../components/common/addButton.js';
-import Modal from '../components/modals/modal.js';
-import TaskModal from '../components/modals/taskModal.js';
 import { TaskList } from '../components/common/taskList.js';
 import bus, { EVENTS } from '../utils/bus.js';
 import db from '../utils/dbManager.js';
+import Modal, { MODAL_CONTENT } from '../components/modals/modal.js';
 
 export default class Today {
   #node
-  #modalContent
-  #modal
   #taskList
 
   constructor() {
     this.#node = createNode('div', {'class': 'page-today'});
 
     const pageContent = createNode('div', {class: 'today-content'});
-
-    this.#modalContent = new TaskModal();
-    this.#modal = new Modal();
     pageContent.append(this.#createHeader(), this.#createNewTaskBtn());
 
     this.#addEventListeners();
-    this.#node.append(pageContent, this.#modal.node);
+    this.#node.append(pageContent, new Modal().node);
     
     this.#loadTasksFromDB().then((tasks) => {
       this.#taskList = new TaskList(tasks);
@@ -49,13 +43,17 @@ export default class Today {
   
   #openModal(task={}) {
     task.date = task.date ?? this.#getTodayStringDate();
-    this.#modalContent.render(task);
-    bus.emit(EVENTS.MODAL.OPEN, this.#modalContent.node);
-    this.#node.querySelector('.today-content').setAttribute('inert', '');
+    bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.TASK, data: task});
+    
+    const content = this.#node.querySelector('.today-content');
+    content.setAttribute('inert', '');
 
     bus.on(
       EVENTS.MODAL.CLOSE, 
-      () => this.#onModalClose(),
+      () => {
+        content.removeAttribute('inert');
+        content.querySelector('.add-btn').focus();    
+      },
       {clearOnReload: true, once: true}
     );
   }
@@ -65,14 +63,9 @@ export default class Today {
     button.label = 'Add a task';
     button.addEventListener('click', () => this.#openModal());
     
-    return button;
+    return button.node;
   }
   
-  #onModalClose() {
-    this.#node.querySelector('.today-content').removeAttribute('inert');
-    this.#node.querySelector('.add-btn').focus();
-  }
-
   #addEventListeners() {
     bus.on(
       EVENTS.TASKS_LIST.TASK_DETAILS, 

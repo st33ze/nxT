@@ -4,27 +4,20 @@ import AddButton from '../components/common/addButton.js';
 import db from '../utils/dbManager.js';
 import ProjectList from '../components/common/projectList.js';
 import bus, {EVENTS} from '../utils/bus.js';
-import Modal from '../components/modals/modal.js';
-import ProjectModal from '../components/modals/projectModal.js';
+import Modal, {MODAL_CONTENT} from '../components/modals/modal.js';
 
 export default class Projects {
   #node;
   #projectList;
-  #modal
 
   constructor() {
     this.#node = createNode('div', {'class': 'page-projects'});
     
     const pageContent = createNode('div', {class: 'projects-content'});
-
-    this.#modal = {
-      window: new Modal(),
-      content: new ProjectModal(),
-    }
     pageContent.append(this.#createHeader(), this.#createNewProjectBtn());
 
     this.#addEventListeners();
-    this.#node.append(pageContent, this.#modal.window.node);
+    this.#node.append(pageContent, new Modal().node);
 
     this.#loadProjectsFromDB().then((projects) => {
       this.#projectList = new ProjectList(projects);
@@ -45,13 +38,16 @@ export default class Projects {
   }
 
   #openModal(project={}) {
-    this.#modal.content.render(project);
-    bus.emit(EVENTS.MODAL.OPEN, this.#modal.content.node);
-    this.#node.querySelector('.projects-content').setAttribute('inert', '');
+    bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.PROJECT, data: project});
+    const content = this.#node.querySelector('.projects-content');
+    content.setAttribute('inert', '');
 
     bus.on(
       EVENTS.MODAL.CLOSE, 
-      () => this.#onModalClose(),
+      () => {
+        content.removeAttribute('inert');
+        content.querySelector('.add-btn').focus();    
+      },
       {clearOnReload: true, once: true}
     );
   }
@@ -61,13 +57,7 @@ export default class Projects {
     button.label = 'Create new project';
     button.addEventListener('click', () => this.#openModal());
 
-    return button;
-  }
-
-  #onModalClose() {
-    const pageContent = this.#node.querySelector('.projects-content');
-    pageContent.removeAttribute('inert');
-    pageContent.querySelector('.add-btn').focus();
+    return button.node;
   }
 
   #addEventListeners() {

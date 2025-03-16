@@ -3,8 +3,14 @@ import { createNode } from '../../utils/domUtils.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, { EVENTS } from '../../utils/bus.js';
 
+export const MODAL_CONTENT = {
+  TASK: 'taskModal',
+  PROJECT: 'projectModal',
+};
+
 export default class Modal {
-  #node
+  #node;
+  #loadedContent;
 
   constructor() {
     this.#node = createNode('div', {
@@ -18,6 +24,8 @@ export default class Modal {
     );
 
     this.#addEventListeners();
+
+    this.#loadedContent = new Map();
   }
   
   #createCloseBtn() {
@@ -32,15 +40,30 @@ export default class Modal {
     return btn;
   }
 
-  #open(contentNode) {
-    this.#node.querySelector('.modal-content')
-      .appendChild(contentNode);
-
-    this.#node.classList.add('open');
-    this.#node.setAttribute('aria-hidden', 'false');
-    
-    this.#node.querySelector('.close-btn').focus();
+  async #loadContent(name) {
+    if (this.#loadedContent.has(name)) {
+      return this.#loadedContent.get(name);
+    }
+  
+    try {
+      const module = await import(`./${name}.js`);
+      const content = new module.default();
+      this.#loadedContent.set(name, content);
+      return content;
+    } catch (error) {
+      console.error('Failed to load module content:', error);
+    }
   }
+
+  #open(content) {
+      this.#node.querySelector('.modal-content')
+        .appendChild(content.node);
+      
+      this.#node.classList.add('open');
+      this.#node.setAttribute('aria-hidden', 'false');
+  
+      this.#node.querySelector('.close-btn').focus();
+    }
   
   #close() {
     this.#node.classList.add('closing');
@@ -48,12 +71,15 @@ export default class Modal {
     
     setTimeout(() => {
       this.#node.classList.remove('open', 'closing');
-      this.#node.querySelector('.modal-content').innerHTML = '';
     }, 500);
   }
 
   #addEventListeners() {
-    bus.on(EVENTS.MODAL.OPEN, (content) => this.#open(content), {clearOnReload: true});
+    bus.on(EVENTS.MODAL.OPEN, async (modal) => {
+      const content = await this.#loadContent(modal.type);
+      content.render(modal.data);
+      this.#open(content);
+    });
     bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
   }
   
