@@ -70,6 +70,8 @@
     }
     .save-btn {
       margin-left: 0;
+      color: hsl(var(--bg-primary-500));
+      background-color: hsl(var(--clr-primary-500));
       &:disabled {
         color: hsl(var(--clr-secondary-500) / 0.5);
         background-color: hsl(var(--bg-primary-400));
