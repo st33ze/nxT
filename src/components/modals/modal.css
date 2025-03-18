@@ -46,8 +46,28 @@ main {
   &.closing {
     --scaleY: scaleY(0);
   }
-  .close-btn {
-    margin-left: auto;
+}
+.modal-controls {
+  display: flex;
+  justify-content: end;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  button {
     color: hsl(var(--clr-secondary-500));
   }
+  .back-btn {
+    display: none;
+    svg {
+      width: 1rem;
+      height: 2rem;
+    }
+  }
+}
+.modal-content{
+  & > *:not(:last-child) {
+    display: none;
+  }
+}
+.modal:has(.modal-content > :nth-child(2)) .back-btn {
+  display: block;
 }

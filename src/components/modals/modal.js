@@ -19,7 +19,7 @@ export default class Modal {
     });
     
     this.#node.append(
-      this.#createCloseBtn(),
+      this.#createControlBtns(),
       createNode('div', {class: 'modal-content'})
     );
 
@@ -28,6 +28,17 @@ export default class Modal {
     this.#loadedContent = new Map();
   }
   
+  #createControlBtns() {
+    const btnPanel = createNode('div', { class: 'modal-controls' });
+
+    const backBtn = this.#createBackBtn();
+    const closeBtn = this.#createCloseBtn();
+
+    btnPanel.append(backBtn, closeBtn);
+
+    return btnPanel;
+  }
+
   #createCloseBtn() {
     const btn = createNode('button', {
       class: 'close-btn',
@@ -36,6 +47,20 @@ export default class Modal {
     btn.appendChild(createSVGElement('close'));
 
     btn.addEventListener('click', () => bus.emit(EVENTS.MODAL.CLOSE));
+
+    return btn;
+  }
+
+  #createBackBtn() {
+    const btn = createNode('button', {
+      class: 'back-btn',
+      'aria-label': 'Go back',
+    });
+    btn.appendChild(createSVGElement('arrow'));
+
+    btn.addEventListener('click', () => {
+      this.#node.querySelector('.modal-content > :last-child').remove();
+    });
 
     return btn;
   }
@@ -57,12 +82,14 @@ export default class Modal {
 
   #open(content) {
       this.#node.querySelector('.modal-content')
-        .appendChild(content.node);
+        .appendChild(content);
       
-      this.#node.classList.add('open');
-      this.#node.setAttribute('aria-hidden', 'false');
-  
-      this.#node.querySelector('.close-btn').focus();
+      if (!this.#node.classList.contains('open')) {
+        this.#node.classList.add('open');
+        this.#node.setAttribute('aria-hidden', 'false');
+    
+        this.#node.querySelector('.close-btn').focus();
+      }
     }
   
   #close() {
@@ -79,7 +106,7 @@ export default class Modal {
     bus.on(EVENTS.MODAL.OPEN, async (modal) => {
       const content = await this.#loadContent(modal.type);
       content.render(modal.data);
-      this.#open(content);
+      this.#open(content.node);
     });
     bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
   }
