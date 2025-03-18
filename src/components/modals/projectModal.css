@@ -25,14 +25,16 @@
       display: none;
     }
     .task-list {
+      visibility: hidden;
       height: 0;
       opacity: 0;
       overflow-y: hidden;
-      transition: height .3s ease-in, opacity 0.3s ease;
+      transition: height .3s ease-in, opacity 0.3s ease, visibility 0.5s;
     }
   }
   .task-section.expanded {
     .task-list {
+      visibility: visible;
       height: fit-content;
       opacity: 1;
     }

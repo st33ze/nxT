@@ -14,7 +14,13 @@ class TaskSection {
   #projectId
 
   constructor() {
-    this.#node = createNode('div', { class: 'task-section' });
+    this.#node = createNode('div', {
+      class: 'task-section',
+      role: 'button',
+      tabindex: '0',
+      'aria-label': 'Show tasks',
+      'aria-expanded': 'false',
+    });
     
     this.#taskList = new TaskList();
 
@@ -24,21 +30,36 @@ class TaskSection {
   }
 
   #createHeader() {
-    const header = createNode('div', { class: 'task-section--header'} );
+    const header = createNode('div', { class: 'task-section--header' });
     header.append(
       createNode('h3'), 
       createSVGElement('arrow'),
       ProgressIndicator.create()
     );
-    header.addEventListener('click', () => {
+
+    function toggleAccordtion() {
       this.#node.style.interpolateSize = 'allow-keywords';
-      this.#node.classList.toggle('expanded');
+      
+      const isExpanded = this.#node.classList.contains('expanded');
+      this.#node.classList.toggle('expanded', !isExpanded);
+      this.#node.setAttribute('aria-expanded', !isExpanded);
+      
+      const label = isExpanded ? 'Show tasks': 'Hide tasks';
+      this.#node.setAttribute('aria-label', label);
       
       this.#node.addEventListener('transitionend', () => {
         this.#node.removeAttribute('style');
       }, { once: true });
+    }
 
+    this.#node.addEventListener('click', toggleAccordtion.bind(this));
+    this.#node.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key   === ' ') {
+        e.preventDefault();
+        toggleAccordtion.call(this);
+      }
     });
+    
     return header;
   }
 
