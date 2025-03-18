@@ -6,6 +6,7 @@ import { TaskList } from '../common/taskList.js';
 import ProgressIndicator from '../common/ProgressIndicator.js';
 import bus, { EVENTS } from '../../utils/bus.js';
 import { calcProgress } from '../../utils/projectUtils.js';
+import { MODAL_CONTENT } from './modal.js';
 
 class TaskSection {
   #node;
@@ -169,6 +170,9 @@ export default class ProjectModal {
       'aria-label': 'Add new task'
     });
     addTaskBtn.appendChild(createSVGElement('addTask'));
+    addTaskBtn.addEventListener('click', () => {
+      bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.TASK});
+    });
     
     this.#buttons = {save: saveBtn, delete: deleteBtn, addTask: addTaskBtn};
     buttonPanel.append(addTaskBtn, deleteBtn, saveBtn);
