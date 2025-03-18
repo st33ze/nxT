@@ -37,7 +37,7 @@
       opacity: 1;
     }
     h3 + svg {
-      transform: rotateX(180deg);
+      transform: rotate(90deg);
     }
   }
   .task-section--header {
@@ -48,6 +48,9 @@
       font-weight: var(--fw-normal);
       font-size: var(--fs-400);
       + svg {
+        transform: rotate(270deg);
+        width: 24px;
+        height: 12px;
         transition: transform .5s;
       }
     }
