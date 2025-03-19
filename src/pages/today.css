@@ -1,7 +1,7 @@
 .page-today {
   height: 100%;
   animation-name: ease-in;
-  animation-duration: 1s;
+  animation-duration: 0.4s;
 }
 .page-today h1 {
   font-size: var(--fs-500);
