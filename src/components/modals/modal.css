@@ -10,7 +10,7 @@ main {
     background-color: hsla(var(--clr-primary-500), 0.8);
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.5s ease-in;
+    transition: opacity 0.4s ease-in;
   }
   &:has(.modal.open)::before {
     opacity: 1;
@@ -22,29 +22,32 @@ main {
 }
 .modal {
   position: absolute;
-  top: 50%;
+  bottom: 0;
   left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  width: min(95%, 500px);
+  width: min(100%, 500px);
   max-height: 90%;
   padding: 0.5rem;
+  padding-bottom: 1rem;
   overflow-y: auto;
   z-index: 100;
   background-color: hsl(var(--bg-primary-400));
-  border-radius: 0.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  clip-path: inset(100% 0 0 0);
+  opacity: 0;
   visibility: hidden;
-  transform-origin: center;
-  --translate: translate(-50%, -50%);
-  --scaleY: scaleY(0);
-  transform: var(--translate) var(--scaleY);
-  transition: transform 0.5s cubic-bezier(0.78, 0, 0.22, 1);
+  transition: clip-path 0.4s cubic-bezier(0.66, 0, 0.34, 1), 
+              opacity 0.4s ease-in-out;
   &.open {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
     visibility: visible;
-    --scaleY: scaleY(1);
   }
   &.closing {
-    --scaleY: scaleY(0);
+    clip-path: inset(100% 0 0 0);
+    opacity: 0;
   }
 }
 .modal-controls {
