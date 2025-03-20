@@ -51,6 +51,7 @@ export const EVENTS = {
     OPEN: 'modal:open',
     CLOSE: 'modal:close',
     INPUT_CHANGE: 'modal:inputChange',
+    CONTENT_CLOSE: 'modal:contentClose',
   },
   TASKS_LIST: {
     MENU_CLOSE: 'tasksList:menuClose',

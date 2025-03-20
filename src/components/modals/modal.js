@@ -51,6 +51,10 @@ export default class Modal {
     return btn;
   }
 
+  #closeContent()  {
+    this.#node.querySelector('.modal-content > :last-child').remove();
+  }
+
   #createBackBtn() {
     const btn = createNode('button', {
       class: 'back-btn',
@@ -58,9 +62,7 @@ export default class Modal {
     });
     btn.appendChild(createSVGElement('arrow'));
 
-    btn.addEventListener('click', () => {
-      this.#node.querySelector('.modal-content > :last-child').remove();
-    });
+    btn.addEventListener('click', this.#closeContent.bind(this));
 
     return btn;
   }
@@ -107,8 +109,15 @@ export default class Modal {
       const content = await this.#loadContent(modal.type);
       content.render(modal.data);
       this.#open(content.node);
-    });
+    }, {clearOnReload: true});
     bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
+    bus.on(EVENTS.MODAL.CONTENT_CLOSE, () => {
+      if (this.#loadedContent.size > 1) {
+        this.#closeContent();
+      } else {
+        this.#close();
+      }
+    }, {clearOnReload: true});
   }
   
   get node() {

@@ -173,7 +173,7 @@ export default class ProjectModal {
       } else {
         bus.emit(EVENTS.PROJECT.EDIT, this.project);
       }
-      bus.emit(EVENTS.MODAL.CLOSE);
+      bus.emit(EVENTS.MODAL.CONTENT_CLOSE);
     });
 
     const deleteBtn = createNode('button', { 
@@ -183,7 +183,7 @@ export default class ProjectModal {
     deleteBtn.appendChild(createSVGElement('delete'));
     deleteBtn.addEventListener('click', () => {
       bus.emit(EVENTS.PROJECT.DELETE, this.project.id);
-      bus.emit(EVENTS.MODAL.CLOSE);
+      bus.emit(EVENTS.MODAL.CONTENT_CLOSE);
     });
 
     const addTaskBtn = createNode('button', {
