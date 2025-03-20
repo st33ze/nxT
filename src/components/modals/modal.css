@@ -74,3 +74,18 @@ main {
 .modal:has(.modal-content > :nth-child(2)) .back-btn {
   display: block;
 }
+
+@media screen and (min-width: 500px) {
+  .modal {
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    border-radius: 0.5rem;
+    transform: translate(-50%, -50%);
+    clip-path: inset(50% 0 50% 0);
+    &.closing {
+      clip-path: inset(50% 0 50% 0);
+    }
+  }
+  
+}
