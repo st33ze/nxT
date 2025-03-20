@@ -107,6 +107,17 @@ class TaskSection {
         },
         {clearOnReload: true}
     )
+
+    bus.on(
+      EVENTS.TASK.CREATE,
+      (task) => {
+        if (task.projectId === this.#projectId) {
+          this.#taskList.save(task);
+          this.#handleTaskListChange();
+        }
+      },
+      {clearOnReload: true}
+    );
   }
 
   renderTasks(tasks, projectId) {
