@@ -192,7 +192,10 @@ export default class ProjectModal {
     });
     addTaskBtn.appendChild(createSVGElement('addTask'));
     addTaskBtn.addEventListener('click', () => {
-      bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.TASK});
+      bus.emit(EVENTS.MODAL.OPEN, {
+        type: MODAL_CONTENT.TASK, 
+        data: {projectId: this.#id}
+      });
     });
     
     this.#buttons = {save: saveBtn, delete: deleteBtn, addTask: addTaskBtn};
