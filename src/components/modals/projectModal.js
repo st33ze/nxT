@@ -16,9 +16,6 @@ class TaskSection {
   constructor() {
     this.#node = createNode('div', {
       class: 'task-section',
-      role: 'button',
-      tabindex: '0',
-      'aria-label': 'Show tasks',
       'aria-expanded': 'false',
     });
     
@@ -30,7 +27,12 @@ class TaskSection {
   }
 
   #createHeader() {
-    const header = createNode('div', { class: 'task-section--header' });
+    const header = createNode('div', {
+      class: 'task-section--header',
+      role: 'button',
+      tabindex: '0',
+      'aria-label': 'Show tasks',
+    });
     header.append(
       createNode('h3'), 
       createSVGElement('arrow'),
@@ -45,15 +47,15 @@ class TaskSection {
       this.#node.setAttribute('aria-expanded', !isExpanded);
       
       const label = isExpanded ? 'Show tasks': 'Hide tasks';
-      this.#node.setAttribute('aria-label', label);
+      header.setAttribute('aria-label', label);
       
       this.#node.addEventListener('transitionend', () => {
         this.#node.removeAttribute('style');
       }, { once: true });
     }
 
-    this.#node.addEventListener('click', toggleAccordtion.bind(this));
-    this.#node.addEventListener('keydown', (e) => {
+    header.addEventListener('click', toggleAccordtion.bind(this));
+    header.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key   === ' ') {
         e.preventDefault();
         toggleAccordtion.call(this);
