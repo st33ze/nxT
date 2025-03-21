@@ -115,7 +115,7 @@ export default class Modal {
       if (this.#loadedContent.size > 1) {
         this.#closeContent();
       } else {
-        this.#close();
+        bus.emit(EVENTS.MODAL.CLOSE);
       }
     }, {clearOnReload: true});
   }
