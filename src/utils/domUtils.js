@@ -35,6 +35,7 @@ export function updatePositions(list, sortedIds) {
 
 
   items.forEach((item, index) => {
+    item.style.width = `${item.offsetWidth}px`;
     item.style.position = 'absolute';
     item.style.top = `${posValues[index].top}px`;
     item.style.left = `${posValues[index].left}px`;
