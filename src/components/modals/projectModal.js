@@ -39,7 +39,7 @@ class TaskSection {
       ProgressIndicator.create()
     );
 
-    function toggleAccordtion() {
+    function toggleAccordion() {
       this.#node.style.interpolateSize = 'allow-keywords';
       
       const isExpanded = this.#node.classList.contains('expanded');
@@ -54,11 +54,11 @@ class TaskSection {
       }, { once: true });
     }
 
-    header.addEventListener('click', toggleAccordtion.bind(this));
+    header.addEventListener('click', toggleAccordion.bind(this));
     header.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key   === ' ') {
         e.preventDefault();
-        toggleAccordtion.call(this);
+        toggleAccordion.call(this);
       }
     });
     
@@ -76,8 +76,8 @@ class TaskSection {
   }
 
   #handleTaskListChange() {
-    const completionList = this.#taskList.getCompletionList();
-    const progress = completionList.length ? calcProgress(completionList): null;    
+    const completionList = this.#taskList.completionList;
+    const progress = completionList.length ? calcProgress(completionList): null;
     
     this.#updateHeader(completionList.length, progress);
 

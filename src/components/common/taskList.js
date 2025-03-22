@@ -221,10 +221,6 @@ class TaskList {
     this.#node.replaceChildren(fragment);
   }
 
-  getCompletionList() {
-    return [...this.#tasks.values()].map(task => task.completed);
-  }
-
   delete(id) {
     if (this.#tasks.delete(id)) {
       this.#findListItem(id).remove();
@@ -248,6 +244,10 @@ class TaskList {
 
   has(id) {
     return this.#tasks.has(id);
+  }
+
+  get completionList() {
+    return [...this.#tasks.values()].map(task => task.completed);
   }
 
   get isEmpty() {
