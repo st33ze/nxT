@@ -7,7 +7,7 @@ import bus, { EVENTS } from '../../utils/bus.js';
 class ProjectCard {
   static create(project) {
     const card = createNode('article', {
-      class: 'project-card',
+      class: 'project-card no-tasks',
       'data-project-id': project.id
     });
     
@@ -26,11 +26,13 @@ class ProjectCard {
       card.querySelector('.project-title').textContent = project.title;
     }
     
-    card.classList.toggle('no-tasks', project.progress == null);
-    ProgressIndicator.update(
-      card.querySelector('.project-progress'),
-      project.progress
-    );
+    if (project.progress !== undefined) {
+      card.classList.toggle('no-tasks', project.progress === null);
+      ProgressIndicator.update(
+        card.querySelector('.project-progress'),
+        project.progress
+      );
+    }
   }
 }
 
