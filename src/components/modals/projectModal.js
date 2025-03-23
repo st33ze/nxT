@@ -7,6 +7,7 @@ import ProgressIndicator from '../common/ProgressIndicator.js';
 import bus, { EVENTS } from '../../utils/bus.js';
 import { calcProgress } from '../../utils/projectUtils.js';
 import { MODAL_CONTENT } from './modal.js';
+import db from '../../utils/dbManager.js';
 
 class TaskSection {
   #node;
@@ -117,6 +118,19 @@ class TaskSection {
           this.#taskList.save(task);
           this.#handleTaskListChange();
         }
+      },
+      {clearOnReload: true}
+    );
+
+    bus.on(
+      EVENTS.TASKS_LIST.TASK_DETAILS,
+      (id) => {
+        db.getEntity('tasks', id).then((task) => {
+          bus.emit(EVENTS.MODAL.OPEN, {
+            type: MODAL_CONTENT.TASK, 
+            data: task
+          });
+        });
       },
       {clearOnReload: true}
     );
