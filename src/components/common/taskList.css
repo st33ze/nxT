@@ -67,6 +67,10 @@
 }
 
 /* ====================|| ITEM MENU ||==================== */
+.task-lists-container:has(.item-menu.closing),
+.task-list:has(.item-menu.closing) {
+  pointer-events: none;
+}
 .item-menu {
   position: absolute;
   right: 0;
