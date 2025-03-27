@@ -11,8 +11,8 @@ class ItemMenu {
 
   constructor() {
     this.#node = createNode('div', {
-      'class': 'item-menu hidden',
-      'role': 'menu',
+      class: 'item-menu',
+      role: 'menu',
       'aria-hidden': 'true',
     });
     this.#modalBtn = ItemMenu.#createButton('text', {'aria-label': 'Show more'});
@@ -26,69 +26,30 @@ class ItemMenu {
     button.appendChild(createSVGElement(icon));
     return button;
   }
- 
-  open(taskID) {
-    this.#node.classList.remove('hidden');
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.#node.classList.add('open');
-        this.#node.setAttribute('aria-hidden', 'false');
-        this.#modalBtn.focus();
   
-        const handleClickEvent = (e) => {
-          const button = e.target.closest('button');
-          const buttonEventMap = new Map([
-            [this.#modalBtn, EVENTS.TASKS_LIST.TASK_DETAILS],
-            [this.#deleteBtn, EVENTS.TASK.DELETE]
-          ]);
-          const event = buttonEventMap.get(button) ?? null;
-          
-          this.close().then(() => {
-            if (event) bus.emit(event, taskID);
-          });
-          
-          document.removeEventListener('keydown', handleKeydownEvent);
-              
-        };
-
-        const handleKeydownEvent = (e) => {
-          if (e.key === 'Escape') {
-            this.close();
-            document.removeEventListener('click', handleClickEvent);
-            document.removeEventListener('keydown', handleKeydownEvent);
-          }
-        };
-
-        document.addEventListener('keydown', handleKeydownEvent);
-        document.addEventListener('click', handleClickEvent, {once: true});
-      });
-    });
+  open(li) {
+    this.#node.classList.add('open');
+    this.#node.setAttribute('aria-hidden', 'false');
+    this.#modalBtn.focus();
   }
 
-  async close() {
-    const isClosing = this.#node.classList.contains('closing');
-    if (isClosing || !this.isOpen) return;
-    
-    this.#node.classList.add('closing');
-    
-    await new Promise((resolve) => {
-      const onTransitionEnd = (event) => {
-        if (event.target === this.#node) {
-          this.#node.removeEventListener('transitionend', onTransitionEnd);
-          this.#node.classList.remove('closing', 'open');
-          this.#node.setAttribute('aria-hidden', 'true');
-          this.#node.classList.add('hidden');
-          bus.emit(EVENTS.TASKS_LIST.MENU_CLOSE);
-          resolve();
-        }
-      };
-      this.#node.addEventListener('transitionend', onTransitionEnd);
+  close() {
+    if (!this.isOpen) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      this.#node.classList.add('closing');
+      
+      setTimeout(() => {
+        this.#node.classList.remove('closing', 'open');
+        this.#node.setAttribute('aria-hidden', 'true');
+        resolve();
+      }
+      , 300);
     });
   }
-
+  
   get isOpen() {
-    return !this.#node.classList.contains('hidden');
+    return this.#node.classList.contains('open');
   }
 
   get node () {
