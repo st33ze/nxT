@@ -4,59 +4,6 @@ import { createSVGElement } from '../../assets/icons.js';
 import bus, {EVENTS} from '../../utils/bus.js';
 import * as taskUtils from '../../utils/taskUtils.js';
 
-class ItemMenu {
-  #node
-  #modalBtn
-  #deleteBtn
-
-  constructor() {
-    this.#node = createNode('div', {
-      class: 'item-menu',
-      role: 'menu',
-      'aria-hidden': 'true',
-    });
-    this.#modalBtn = ItemMenu.#createButton('text', {'aria-label': 'Show more'});
-    this.#deleteBtn = ItemMenu.#createButton('delete', {'aria-label': 'Delete task'});
-
-    this.#node.append(this.#modalBtn, this.#deleteBtn);
-  }
-
-  static #createButton(icon, attributes) {
-    const button = createNode('button', {...attributes});
-    button.appendChild(createSVGElement(icon));
-    return button;
-  }
-  
-  open(li) {
-    this.#node.classList.add('open');
-    this.#node.setAttribute('aria-hidden', 'false');
-    this.#modalBtn.focus();
-  }
-
-  close() {
-    if (!this.isOpen) return Promise.resolve();
-
-    return new Promise((resolve) => {
-      this.#node.classList.add('closing');
-      
-      setTimeout(() => {
-        this.#node.classList.remove('closing', 'open');
-        this.#node.setAttribute('aria-hidden', 'true');
-        resolve();
-      }
-      , 300);
-    });
-  }
-  
-  get isOpen() {
-    return this.#node.classList.contains('open');
-  }
-
-  get node () {
-    return this.#node;
-  }
-}
-
 class TaskListItem {
   static #createCheckbox() {
     return createNode('input', {
@@ -122,7 +69,6 @@ class TaskListItem {
 }
 
 class TaskList {
-  static #itemMenu = new ItemMenu();
   #node
   #tasks
 
@@ -134,21 +80,7 @@ class TaskList {
     this.#node.addEventListener('click', this.#handleClickEvent);
   }
 
-  static #openTaskMenu(li, taskID) {
-    const menu = TaskList.#itemMenu;
-    menu.close().then(() => {
-      li.appendChild(menu.node);
-      menu.open(taskID);
 
-      TaskListItem.onMenuToggle(li);
-
-      bus.on(
-        EVENTS.TASKS_LIST.MENU_CLOSE,
-        () => TaskListItem.onMenuToggle(li),
-        {once: true}
-      );
-    });
-  }
 
   #handleClickEvent = (e) => {
     const li = e.target.closest('li');
@@ -158,7 +90,7 @@ class TaskList {
     const task = this.#tasks.get(id);
 
     if(TaskListItem.isTitleBtn(e.target)) {
-      TaskList.#openTaskMenu(li, id);
+      bus.emit(EVENTS.TASKS_LIST.TASK_DETAILS, id);
     } else if (TaskListItem.isCheckbox(e.target)) {
       task.completed = e.target.checked;
       bus.emit(EVENTS.TASK.SAVE, task);

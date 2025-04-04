@@ -21,6 +21,7 @@
 /* ====================|| TASK LIST ||==================== */
 .task-list {
   --task-clr: transparent;
+  --item-height: 1.8rem;
   position: relative;
   display: grid;
   row-gap: 0.25rem;
@@ -37,11 +38,10 @@
   }
 }
 .task-list li {
-  position: relative;
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  height: 1.1lh;
+  height: var(--item-height);
   width: 100%;
   padding-left: 0.1rem;
   border-left: 4px solid var(--task-clr);
@@ -64,45 +64,4 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* ====================|| ITEM MENU ||==================== */
-.task-lists-container:has(.item-menu.closing),
-.task-list:has(.item-menu.closing) {
-  pointer-events: none;
-}
-.item-menu {
-  position: absolute;
-  right: 0;
-  display: flex;
-  justify-content: end;
-  width: 100%;
-  border-radius: 6px;
-  z-index: 10;
-  background-color: hsla(var(--clr-primary-500), 0.25);
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.3s ease-in-out;
-  cursor: pointer;
-}
-.item-menu.hidden {
-  display: none;
-}
-.item-menu.open {
-  transform: scaleX(1);
-}
-.item-menu.closing {
-  transform: scaleX(0);
-}
-.item-menu button {
-  background-color: hsl(var(--clr-primary-500));
-  color: hsl(var(--bg-primary-500));
-  padding-inline: 0.2rem;
-}
-.item-menu button:last-child {
-  border-radius: 0 6px 6px 0;
-}
-.item-menu svg {
-  height: 28px;
-  width: 28px;
 }
