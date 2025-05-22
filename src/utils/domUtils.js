@@ -17,49 +17,53 @@ export function getElementId(element) {
 }
 
 export function updatePositions(list, sortedIds) {
-  list.style.pointerEvents = 'none';
   const items = Array.from(list.children);
-  const lRect = list.getBoundingClientRect();
+  const idToItem = new Map(items.map(item => [getElementId(item), item]));
 
-  list.style.height = lRect.height + 'px';
-  list.style.position = 'relative';
+  const activeElement = document.activeElement;
 
-  const posValues = items.map(item => {
-    const rect = item.getBoundingClientRect();
-    return {
-      top: rect.top - lRect.top,
-      left: rect.left - lRect.left
-    };
-    
+  // Step 1: Capture initial positions
+  const firstRects = new Map();
+  items.forEach(item => {
+    firstRects.set(item, item.getBoundingClientRect());
   });
 
-
-  items.forEach((item, index) => {
-    item.style.width = `${item.offsetWidth}px`;
-    item.style.position = 'absolute';
-    item.style.top = `${posValues[index].top}px`;
-    item.style.left = `${posValues[index].left}px`;
+  // Step 2: Reorder in-place
+  sortedIds.forEach((id, i) => {
+    const expectedItem = idToItem.get(id);
+    if (list.children[i] !== expectedItem) {
+      list.insertBefore(expectedItem, list.children[i]);
+    }
   });
 
-  const idMappedItems = new Map(items.map(item => {
-    return [getElementId(item), item];
-  }));
+  // Step 3: Capture new positions and animate
+  const newItems = Array.from(list.children);
+  newItems.forEach(item => {
+    const firstRect = firstRects.get(item);
+    const lastRect = item.getBoundingClientRect();
 
-  sortedIds.forEach((id, index) => {
-    const item = idMappedItems.get(id);
-    const top = item.getBoundingClientRect().top - lRect.top;
-    const translateY = `${posValues[index].top - top}px`
-    const left = item.getBoundingClientRect().left - lRect.left;
-    const translateX = `${posValues[index].left - left}px`;
-    item.style.transform = `translate(${translateX}, ${translateY})`;
+    const deltaX = firstRect.left - lastRect.left;
+    const deltaY = firstRect.top - lastRect.top;
+
+    if (deltaX !== 0 || deltaY !== 0) {
+      item.style.transition = 'none';
+      item.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+      // Force layout so the browser picks up the transform
+      item.getBoundingClientRect();
+
+      // Step 4: Animate back to new position
+      item.style.transition = 'transform 300ms ease';
+      item.style.transform = '';
+
+      item.addEventListener('transitionend', () => {
+        item.removeAttribute('style');
+      }, { once: true });
+    }
   });
 
-  setTimeout(() => {
-    sortedIds.forEach(id => {
-      const item = idMappedItems.get(id);
-      list.appendChild(item);
-      item.removeAttribute('style');
-    });
-    list.removeAttribute('style');
-  }, 500);
+  // Step 5: Restore focus if needed
+  if (document.activeElement !== activeElement) {
+    activeElement.focus();
+  }
 }
