@@ -33,8 +33,9 @@ export default class Inbox {
     header.appendChild(title);
     return header;
   }
-    
+
   #openModal(task={}) {
+    const caller = document.activeElement;
     bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.TASK, data: task});
     const content =  this.#node.querySelector('.inbox-content');
     content.setAttribute('inert', '');
@@ -43,7 +44,7 @@ export default class Inbox {
       EVENTS.MODAL.CLOSE, 
       () => {
         content.removeAttribute('inert');
-        content.querySelector('.add-btn').focus();    
+        caller?.focus();    
       },
       {clearOnReload: true, once: true}
     );

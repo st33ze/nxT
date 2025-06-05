@@ -1,6 +1,5 @@
 import './taskList.css';
 import { createNode, updatePositions } from '../../utils/domUtils.js';
-import { createSVGElement } from '../../assets/icons.js';
 import bus, {EVENTS} from '../../utils/bus.js';
 import * as taskUtils from '../../utils/taskUtils.js';
 
@@ -16,7 +15,7 @@ class TaskListItem {
   static #createTitle() {
     return createNode('button', {
       class: 'li-task-title',
-      'aria-haspopup': 'true',
+      'aria-haspopup': 'dialog',
       'aria-expanded': 'false',
     });
   }
@@ -79,8 +78,6 @@ class TaskList {
 
     this.#node.addEventListener('click', this.#handleClickEvent);
   }
-
-
 
   #handleClickEvent = (e) => {
     const li = e.target.closest('li');
