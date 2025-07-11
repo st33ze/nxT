@@ -1,5 +1,5 @@
 import { createNode } from '../utils/domUtils.js';
-import { createHeader } from '../utils/pageUtils.js';
+import { createHeader, openModal } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
 import db from '../utils/dbManager.js';
 import ProjectList from '../components/common/projectList.js';
@@ -28,25 +28,10 @@ export default class Projects {
     });
   }
 
-  #openModal(project={}) {
-    bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.PROJECT, data: project});
-    const content = this.#node.querySelector('.projects-content');
-    content.setAttribute('inert', '');
-
-    bus.on(
-      EVENTS.MODAL.CLOSE, 
-      () => {
-        content.removeAttribute('inert');
-        content.querySelector('.add-btn').focus();    
-      },
-      {clearOnReload: true, once: true}
-    );
-  }
-
   #createNewProjectBtn() {
     const button = new AddButton();
     button.label = 'Create new project';
-    button.addEventListener('click', () => this.#openModal());
+    button.addEventListener('click', () => openModal(MODAL_CONTENT.PROJECT));
 
     return button.node;
   }
@@ -60,7 +45,7 @@ export default class Projects {
           db.getTasksByIndex('byProjectId', id)
         ]).then(([project, tasks]) => {
           project.tasks = tasks;
-          this.#openModal(project);
+          openModal(MODAL_CONTENT.PROJECT, project);
         }).catch(error => {
           console.error('Error fetching project details', error);
         });

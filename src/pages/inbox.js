@@ -1,5 +1,5 @@
 import { createNode } from '../utils/domUtils.js';
-import { createHeader } from '../utils/pageUtils.js';
+import { createHeader, openModal } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
 import { MultiTaskLists } from '../components/common/taskList.js';
 import bus, { EVENTS } from '../utils/bus.js';
@@ -25,26 +25,10 @@ export default class Inbox {
     });
   }
   
-  #openModal(task={}) {
-    const caller = document.activeElement;
-    bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.TASK, data: task});
-    const content =  this.#node.querySelector('.inbox-content');
-    content.setAttribute('inert', '');
-
-    bus.on(
-      EVENTS.MODAL.CLOSE, 
-      () => {
-        content.removeAttribute('inert');
-        caller?.focus();    
-      },
-      {clearOnReload: true, once: true}
-    );
-  }
-
   #createNewTaskBtn() {
     const button = new AddButton();
     button.label = 'Add a task';
-    button.addEventListener('click', () => this.#openModal());
+    button.addEventListener('click', () => openModal(MODAL_CONTENT.TASK));
     
     return button.node;
   }
@@ -53,7 +37,7 @@ export default class Inbox {
     bus.on(
       EVENTS.TASKS_LIST.TASK_DETAILS, 
       (id) => {
-        db.getEntity('tasks', id).then((task) => this.#openModal(task));
+        db.getEntity('tasks', id).then((task) => openModal(MODAL_CONTENT.TASK, task));
       },
       {clearOnReload: true}
     );
