@@ -1,5 +1,6 @@
 import './inbox.css';
 import { createNode } from '../utils/domUtils.js';
+import { createHeader } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
 import { MultiTaskLists } from '../components/common/taskList.js';
 import bus, { EVENTS } from '../utils/bus.js';
@@ -14,7 +15,7 @@ export default class Inbox {
     this.#node = createNode('div', {'class': 'page-inbox'});
 
     const pageContent = createNode('div', {class: 'inbox-content'});
-    pageContent.append(this.#createHeader(), this.#createNewTaskBtn());
+    pageContent.append(createHeader('inbox'), this.#createNewTaskBtn());
 
     this.#addEventListeners();
     this.#node.append(pageContent, new Modal().node);
@@ -25,15 +26,6 @@ export default class Inbox {
     });
   }
   
-  #createHeader() {
-    const header = document.createElement('header');
-    const title = document.createElement('h1');
-    title.textContent = 'inbox';
-    
-    header.appendChild(title);
-    return header;
-  }
-
   #openModal(task={}) {
     const caller = document.activeElement;
     bus.emit(EVENTS.MODAL.OPEN, {type: MODAL_CONTENT.TASK, data: task});

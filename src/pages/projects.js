@@ -1,5 +1,6 @@
 import './projects.css';
 import { createNode } from '../utils/domUtils.js';
+import { createHeader } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
 import db from '../utils/dbManager.js';
 import ProjectList from '../components/common/projectList.js';
@@ -14,7 +15,7 @@ export default class Projects {
     this.#node = createNode('div', {'class': 'page-projects'});
     
     const pageContent = createNode('div', {class: 'projects-content'});
-    pageContent.append(this.#createHeader(), this.#createNewProjectBtn());
+    pageContent.append(createHeader('projects'), this.#createNewProjectBtn());
 
     this.#addEventListeners();
     this.#node.append(pageContent, new Modal().node);
@@ -26,15 +27,6 @@ export default class Projects {
     ).catch((error) => {
       console.error('Error loading projects:', error);
     });
-  }
-
-  #createHeader() {
-    const header = document.createElement('header');
-    const title = document.createElement('h1');
-    title.textContent = 'projects';
-    
-    header.appendChild(title);
-    return header;
   }
 
   #openModal(project={}) {

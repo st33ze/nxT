@@ -1,5 +1,6 @@
 import './today.css';
 import { createNode } from '../utils/domUtils.js';
+import { createHeader } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
 import { TaskList } from '../components/common/taskList.js';
 import bus, { EVENTS } from '../utils/bus.js';
@@ -14,7 +15,7 @@ export default class Today {
     this.#node = createNode('div', {'class': 'page-today'});
 
     const pageContent = createNode('div', {class: 'today-content'});
-    pageContent.append(this.#createHeader(), this.#createNewTaskBtn());
+    pageContent.append(createHeader('today'), this.#createNewTaskBtn());
 
     this.#addEventListeners();
     this.#node.append(pageContent, new Modal().node);
@@ -26,16 +27,7 @@ export default class Today {
       console.error('Error loading tasks:', error);
     });
   }
-  
-  #createHeader() {
-    const header = document.createElement('header');
-    const title = document.createElement('h1');
-    title.textContent = 'today';
     
-    header.appendChild(title);
-    return header;
-  }
-  
   #getTodayStringDate() {
     const date = new Date();
     return date.toLocaleDateString('en-CA');
