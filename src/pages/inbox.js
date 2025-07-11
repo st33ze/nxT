@@ -1,4 +1,3 @@
-import './inbox.css';
 import { createNode } from '../utils/domUtils.js';
 import { createHeader } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
@@ -12,9 +11,9 @@ export default class Inbox {
   #tasksLists
 
   constructor() {
-    this.#node = createNode('div', {'class': 'page-inbox'});
+    this.#node = createNode('div', {'class': 'page'});
 
-    const pageContent = createNode('div', {class: 'inbox-content'});
+    const pageContent = createNode('div', {class: 'page-content'});
     pageContent.append(createHeader('inbox'), this.#createNewTaskBtn());
 
     this.#addEventListeners();

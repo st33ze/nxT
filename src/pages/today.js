@@ -1,4 +1,3 @@
-import './today.css';
 import { createNode } from '../utils/domUtils.js';
 import { createHeader } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
@@ -12,9 +11,9 @@ export default class Today {
   #taskList
 
   constructor() {
-    this.#node = createNode('div', {'class': 'page-today'});
+    this.#node = createNode('div', {'class': 'page'});
 
-    const pageContent = createNode('div', {class: 'today-content'});
+    const pageContent = createNode('div', {class: 'page-content'});
     pageContent.append(createHeader('today'), this.#createNewTaskBtn());
 
     this.#addEventListeners();

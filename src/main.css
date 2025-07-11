@@ -121,3 +121,29 @@ button svg {
     grid-column: 2;
   }
 }
+
+/* ====================|| GENERAL PAGE STYLING ||==================== */
+.page {
+  height: 100%;
+  animation-name: ease-in;
+  animation-duration: 0.4s;
+}
+.page h1 {
+  font-size: var(--fs-500);
+  font-weight: var(--fw-bold);
+  text-align: center;
+}
+.page-content {
+  max-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+
+  .add-btn {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease-in-out, visibility 0.25s ease-in-out;
+  }
+}

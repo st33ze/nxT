@@ -1,4 +1,3 @@
-import './projects.css';
 import { createNode } from '../utils/domUtils.js';
 import { createHeader } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
@@ -12,9 +11,9 @@ export default class Projects {
   #projectList;
 
   constructor() {
-    this.#node = createNode('div', {'class': 'page-projects'});
+    this.#node = createNode('div', {'class': 'page'});
     
-    const pageContent = createNode('div', {class: 'projects-content'});
+    const pageContent = createNode('div', {class: 'page-content'});
     pageContent.append(createHeader('projects'), this.#createNewProjectBtn());
 
     this.#addEventListeners();
