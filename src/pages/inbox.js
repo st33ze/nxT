@@ -14,7 +14,11 @@ export default class Inbox {
     this.#node = createNode('div', {'class': 'page'});
 
     const pageContent = createNode('div', {class: 'page-content'});
-    pageContent.append(createHeader('inbox'), this.#createNewTaskBtn());
+    const addButton = new AddButton(
+      'Add a task', 
+      () => openModal(MODAL_CONTENT.TASK)
+    );
+    pageContent.append(createHeader('inbox'), addButton.node);
 
     this.#addEventListeners();
     this.#node.append(pageContent, new Modal().node);
@@ -23,14 +27,6 @@ export default class Inbox {
       this.#tasksLists = new MultiTaskLists(tasks);
       pageContent.appendChild(this.#tasksLists.node);
     });
-  }
-  
-  #createNewTaskBtn() {
-    const button = new AddButton();
-    button.label = 'Add a task';
-    button.addEventListener('click', () => openModal(MODAL_CONTENT.TASK));
-    
-    return button.node;
   }
   
   #addEventListeners() {

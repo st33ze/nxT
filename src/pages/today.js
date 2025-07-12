@@ -14,7 +14,11 @@ export default class Today {
     this.#node = createNode('div', {'class': 'page'});
 
     const pageContent = createNode('div', {class: 'page-content'});
-    pageContent.append(createHeader('today'), this.#createNewTaskBtn());
+    const addButton = new AddButton(
+      'Add a task',
+      () => openModal(MODAL_CONTENT.TASK, {date: this.#getTodayStringDate()})
+    );
+    pageContent.append(createHeader('today'), addButton.node);
 
     this.#addEventListeners();
     this.#node.append(pageContent, new Modal().node);
@@ -30,14 +34,6 @@ export default class Today {
   #getTodayStringDate() {
     const date = new Date();
     return date.toLocaleDateString('en-CA');
-  }
-  
-  #createNewTaskBtn() {
-    const button = new AddButton();
-    button.label = 'Add a task';
-    button.addEventListener('click', () => openModal(MODAL_CONTENT.TASK, {date: this.#getTodayStringDate()}));
-    
-    return button.node;
   }
   
   #addEventListeners() {

@@ -14,7 +14,11 @@ export default class Projects {
     this.#node = createNode('div', {'class': 'page'});
     
     const pageContent = createNode('div', {class: 'page-content'});
-    pageContent.append(createHeader('projects'), this.#createNewProjectBtn());
+    const addButton = new AddButton(
+      'Create new project',
+      () => openModal(MODAL_CONTENT.PROJECT)
+    );
+    pageContent.append(createHeader('projects'), addButton.node);
 
     this.#addEventListeners();
     this.#node.append(pageContent, new Modal().node);
@@ -26,14 +30,6 @@ export default class Projects {
     ).catch((error) => {
       console.error('Error loading projects:', error);
     });
-  }
-
-  #createNewProjectBtn() {
-    const button = new AddButton();
-    button.label = 'Create new project';
-    button.addEventListener('click', () => openModal(MODAL_CONTENT.PROJECT));
-
-    return button.node;
   }
 
   #addEventListeners() {

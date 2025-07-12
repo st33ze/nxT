@@ -5,9 +5,12 @@ import { createSVGElement } from "../../assets/icons";
 export default class AddButton {
   #node
 
-  constructor() {
+  constructor(label, onClick) {
     this.#node = createNode('button', {class: 'add-btn'});
     this.#node.appendChild(createSVGElement('add'));
+
+    this.label = label;
+    this.addEventListener('click', onClick);
   }
 
   addEventListener(event, callback) {
