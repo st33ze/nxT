@@ -1,4 +1,4 @@
-.task-modal {
+/* .task-modal {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -21,9 +21,9 @@
 }
 .input-empty {
   color: hsla(var(--clr-secondary-500));
-}
+} */
 /* ====================|| BUTTON BAR ||==================== */
-.button-bar {
+/* .button-bar {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.5rem;
@@ -147,4 +147,28 @@
 .save-btn svg {
   width: 28px;
   height: 28px;
+} */
+
+
+
+
+
+
+
+
+
+.task-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  h2 {
+    font-size: var(--fs-450);
+    line-height: 1.5rem;
+    &:empty::after {
+      content: '*';
+      color: hsl(var(--clr-prio-high));
+      font-size: 0.8rem;
+    }
+  }
 }
