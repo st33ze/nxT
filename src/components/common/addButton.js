@@ -17,10 +17,7 @@ export default class AddButton {
     this.#node.addEventListener(event, callback);
   }
 
-  /**
-   * Sets aria-label for the button.
-   * @param {string} label
-   */
+  /** @param {string} label */
   set label(label) {
     this.#node.setAttribute('aria-label', label);
   }

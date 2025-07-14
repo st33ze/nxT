@@ -1,7 +1,7 @@
 import './taskModal.css';
 import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
-// import { createSVGElement } from '../../assets/icons.js';
+import { createSVGElement } from '../../assets/icons.js';
 // import bus, { EVENTS } from '../../utils/bus.js';
 
 // class ContentEditable {
@@ -556,11 +556,34 @@ import ContentEditable from './components/ContentEditable.js';
 
 
 
+class TaskCheckbox {
+  #node;
 
+  constructor() {
+    this.#node = createNode('input', {
+      type: 'checkbox',
+      class: 'task-checkbox',
+      'aria-label': 'Task completed'
+    });
+  }
+
+  set value(newValue) {
+    this.#node.checked = newValue;
+  }
+
+  get value() {
+    return this.#node.checked;
+  }
+
+  get node() {
+    return this.#node;
+  }
+}
 
 export default class TaskModal {
   #node;
   #inputs;
+  #buttons;
 
   constructor() {
     this.#node = createNode('div', { class: 'task-modal' });
@@ -578,7 +601,29 @@ export default class TaskModal {
       placeholder: 'Task description',
     });
 
-    this.#inputs = { title, description };
+    const completed = new TaskCheckbox();
+
+    this.#inputs = { title, description, completed };
+  }
+
+  #createBottomPanel() {
+    const panel = createNode('div', { class: 'bottom-panel' });
+
+    const saveBtn = createNode('button', {
+      class: 'save-btn',
+      disabled: true,
+    });
+    saveBtn.textContent = 'Save';
+
+    const deleteBtn = createNode('button', {
+      class: 'delete-btn',
+      'aria-label': 'Delete task',
+    });
+    deleteBtn.appendChild(createSVGElement('delete'));
+
+    panel.append(this.#inputs.completed.node, deleteBtn, saveBtn);
+    this.#buttons = { save: saveBtn, delete: deleteBtn };
+    return panel;
   }
 
   #init() {
@@ -588,10 +633,12 @@ export default class TaskModal {
     const {title, description} = this.#inputs;
     textSection.append(title.node, description.node);
     
-    this.#node.append(textSection);
+    this.#node.append(textSection, this.#createBottomPanel());
   }
 
   render(task = {}) {
+    this.#node.classList.toggle('new-task', !task.hasOwnProperty('id'));
+
     for (const input in this.#inputs) {
       this.#inputs[input].value = task[input];
     }

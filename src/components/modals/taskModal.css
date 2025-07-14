@@ -171,4 +171,53 @@
       font-size: 0.8rem;
     }
   }
+
+  .bottom-panel {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: 0.5rem;
+    button {
+      border-radius: 0.5rem;
+      border: 1px solid hsl(var(--clr-primary-500));
+      font-size: var(--fs-400);
+      transition: all 0.3s;
+      padding: 0.25rem 1rem;
+    }
+    .save-btn {
+      margin-left: 0;
+      color: hsl(var(--bg-primary-500));
+      background-color: hsl(var(--clr-primary-500));
+      &:disabled {
+        color: hsl(var(--clr-secondary-500) / 0.5);
+        background-color: hsl(var(--bg-primary-400));
+        border-color: hsl(var(--clr-secondary-500) / 0.5);
+      }
+    }
+    .delete-btn {
+      padding: 0 0.3rem;
+      color: hsl(var(--clr-prio-high));
+      border-color: hsl(var(--clr-prio-high));
+      svg {
+        width: 28px;
+        height: 28px;
+      }
+    }
+    .task-checkbox {
+      height: 24px;
+      width: 24px;
+      margin-right: auto;
+      outline-offset: -1px;
+      accent-color: hsl(var(--clr-primary-500));
+      cursor: pointer;
+    }
+  }
+
+  &.new-task {
+    .bottom-panel {
+      .delete-btn {
+        display: none;
+      }
+    }
+  }
 }
