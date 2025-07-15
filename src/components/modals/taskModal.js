@@ -2,7 +2,7 @@ import './taskModal.css';
 import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
-// import bus, { EVENTS } from '../../utils/bus.js';
+import bus, { EVENTS } from '../../utils/bus.js';
 
 // class ContentEditable {
 //   #node;
@@ -595,6 +595,9 @@ export default class TaskModal {
     const title = new ContentEditable('h2', {
       placeholder: 'Task title',
       'aria-required': 'true',
+    });
+    title.addEventListener('blur', () => {
+      this.#buttons.save.disabled = !title.node.textContent.trim();
     });
 
     const description = new ContentEditable('p', {
