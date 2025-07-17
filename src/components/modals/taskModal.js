@@ -636,6 +636,10 @@ export default class TaskModal {
       'aria-label': 'Delete task',
     });
     deleteBtn.appendChild(createSVGElement('delete'));
+    deleteBtn.addEventListener('click', () => {
+      bus.emit(EVENTS.TASK.DELETE, this.#id);
+      bus.emit(EVENTS.MODAL.CONTENT_CLOSE);
+    });
 
     panel.append(this.#inputs.completed.node, deleteBtn, saveBtn);
     this.#buttons = { save: saveBtn, delete: deleteBtn };
