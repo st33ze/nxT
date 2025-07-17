@@ -584,6 +584,7 @@ export default class TaskModal {
   #node;
   #inputs;
   #buttons;
+  #id;
 
   constructor() {
     this.#node = createNode('div', { class: 'task-modal' });
@@ -609,6 +610,10 @@ export default class TaskModal {
     this.#inputs = { title, description, completed };
   }
 
+  #isTaskNew() {
+    return this.#node.classList.contains('new-task');
+  }
+
   #createBottomPanel() {
     const panel = createNode('div', { class: 'bottom-panel' });
 
@@ -617,6 +622,14 @@ export default class TaskModal {
       disabled: true,
     });
     saveBtn.textContent = 'Save';
+    saveBtn.addEventListener('click', () => {
+      if (this.#isTaskNew()) {
+        bus.emit(EVENTS.TASK.CREATE, this.task);
+      } else {
+        bus.emit(EVENTS.TASK.EDIT, this.task);
+      }
+      bus.emit(EVENTS.MODAL.CONTENT_CLOSE);
+    });
 
     const deleteBtn = createNode('button', {
       class: 'delete-btn',
@@ -640,11 +653,24 @@ export default class TaskModal {
   }
 
   render(task = {}) {
-    this.#node.classList.toggle('new-task', !task.hasOwnProperty('id'));
+    this.#node.classList.toggle('new-task', task.id == null);
+    this.#id = task.id;
 
     for (const input in this.#inputs) {
       this.#inputs[input].value = task[input];
     }
+  }
+
+  get task() {
+    const task = {};
+    for (const key in this.#inputs) {
+      task[key] = normalizeInputValue(this.#inputs[key].value);
+    }
+    if (!this.#isTaskNew()) {
+      task.id = this.#id;
+    }
+
+    return task;
   }
 
   get node() {

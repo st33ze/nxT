@@ -58,7 +58,7 @@ export const EVENTS = {
     TASK_DETAILS: 'taskList:taskDetails',
   },
   TASK: {
-    SAVE: 'task:save',
+    CREATE: 'task:create',
     DELETE: 'task:delete',
     EDIT: 'task:edit',
   },

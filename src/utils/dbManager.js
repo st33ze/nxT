@@ -82,6 +82,12 @@ class Database {
   }
 
   #addEventListeners() {
+    bus.on(EVENTS.TASK.CREATE, (task) => {
+      this.#save('tasks', task).then((result) => {
+        bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
+      });
+    });
+
     bus.on(EVENTS.TASK.DELETE, async (id) => {
       const task = await this.getEntity('tasks', id);
       if (task) {
