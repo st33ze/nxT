@@ -88,21 +88,15 @@ class Database {
       });
     });
 
+    bus.on(EVENTS.TASK.EDIT, (task) => {
+      this.#unsavedChanges.tasks.set(task.id, task);
+    });
+
     bus.on(EVENTS.TASK.DELETE, async (id) => {
       const task = await this.getEntity('tasks', id);
       if (task) {
         task.deleted = true;
         this.#unsavedChanges.tasks.set(id, task);
-      }
-    });
-
-    bus.on(EVENTS.TASK.SAVE, async (task) => {
-      if (task.id) {
-        this.#unsavedChanges.tasks.set(task.id, task);
-      } else {
-        this.#save('tasks', task).then((result) => {
-          bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
-        });
       }
     });
     
