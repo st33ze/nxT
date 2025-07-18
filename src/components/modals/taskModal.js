@@ -554,7 +554,34 @@ import bus, { EVENTS } from '../../utils/bus.js';
 
 
 
+class TaskDate {
+  #node;
+  #button;
 
+  constructor() {
+    this.#node = createNode('div', {class: 'task-date'});
+    this.#button = this.#createButton();
+    this.#node.append(this.#button);
+  }
+
+  #createButton() {
+    const button = createNode('button', {'aria-label': 'Pick a date'});
+    
+    const icon = createNode('span', {'aria-hidden': 'true'});
+    icon.appendChild(createSVGElement('today'));
+    
+    const text = createNode('span', {class: 'date-text'});
+    text.textContent = 'Date';
+    
+    button.append(icon, text);
+    
+    return button;
+  }
+
+  get node() {
+    return this.#node;
+  }
+}
 
 class TaskCheckbox {
   #node;
@@ -605,9 +632,22 @@ export default class TaskModal {
       placeholder: 'Task description',
     });
 
+    const date = new TaskDate();
+
     const completed = new TaskCheckbox();
 
-    this.#inputs = { title, description, completed };
+    this.#inputs = { title, description, date, completed };
+  }
+
+
+  #createInputPanel() {
+    const panel = createNode('div', { class: 'input-panel' });
+
+    panel.append(
+      this.#inputs.date.node
+    );
+
+    return panel;
   }
 
   #isTaskNew() {
@@ -653,7 +693,7 @@ export default class TaskModal {
     const {title, description} = this.#inputs;
     textSection.append(title.node, description.node);
     
-    this.#node.append(textSection, this.#createBottomPanel());
+    this.#node.append(textSection, this.#createInputPanel(), this.#createBottomPanel());
   }
 
   render(task = {}) {
