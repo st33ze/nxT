@@ -174,21 +174,52 @@
 
   .input-panel {
     display: flex;
-    padding: 0.5rem;
-    background-color: hsl(var(--bg-primary-500));
+    flex-direction: column;
+    border: 1px solid hsl(var(--bg-primary-500));
     border-radius: 0.25rem;
 
+    .input-panel--buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      width: 100%;
 
-    button {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-
-      svg {
-        width: 20px;
-        height: 20px;
+      button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25rem;
+        padding-block: 0.25rem;
+        background-color: hsl(var(--bg-primary-500));
+        
+        svg {
+          width: 20px;
+          height: 20px;
+        }
       }
     }
+
+    .input-panel--inputs {
+      display: flex;
+      align-items: center;
+      min-height: 60px;
+      padding-inline: 0.5rem;
+
+      input[type="date"] {
+        padding: 0.25rem 0.5rem;
+        margin-left: 0.5rem;
+        color: inherit;
+        background-color: inherit;
+        border : none;
+        border: 1px solid hsl(var(--clr-secondary-500) / 0.5);
+        border-radius: 0.5rem;
+
+        &.empty {
+          color: hsl(var(--clr-secondary-500));
+        }
+      }
+    }
+
+
   }
 
   .bottom-panel {

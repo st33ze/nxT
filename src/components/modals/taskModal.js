@@ -555,17 +555,25 @@ import bus, { EVENTS } from '../../utils/bus.js';
 
 
 class TaskDate {
-  #node;
   #button;
+  #input;
+
+  static createLabel() {
+    const label = createNode('label', { for: 'task-date-input' });
+    label.textContent = 'Task date:';
+    return label;
+  }
 
   constructor() {
-    this.#node = createNode('div', {class: 'task-date'});
     this.#button = this.#createButton();
-    this.#node.append(this.#button);
+    this.#input = this.#createInput();
   }
 
   #createButton() {
-    const button = createNode('button', {'aria-label': 'Pick a date'});
+    const button = createNode('button', {
+      'aria-expanded': 'false',
+      'aria-controls': 'task-date-input',
+    });
     
     const icon = createNode('span', {'aria-hidden': 'true'});
     icon.appendChild(createSVGElement('today'));
@@ -578,8 +586,21 @@ class TaskDate {
     return button;
   }
 
-  get node() {
-    return this.#node;
+  #createInput() {
+    const input = createNode('input', {
+      id: 'task-date-input',
+      type: 'date',
+    });
+    
+    return input;
+  }
+
+  get button() {
+    return this.#button;
+  }
+
+  get input() {
+    return this.#input;
   }
 }
 
@@ -643,9 +664,16 @@ export default class TaskModal {
   #createInputPanel() {
     const panel = createNode('div', { class: 'input-panel' });
 
-    panel.append(
-      this.#inputs.date.node
+    const buttons = createNode('div', { class: 'input-panel--buttons' });
+    buttons.append(this.#inputs.date.button);
+
+    const inputs = createNode('div', { class: 'input-panel--inputs' });
+    inputs.append(
+      TaskDate.createLabel(),
+      this.#inputs.date.input
     );
+
+    panel.append(buttons, inputs);
 
     return panel;
   }
