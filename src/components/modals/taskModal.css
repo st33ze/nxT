@@ -195,6 +195,10 @@
           width: 20px;
           height: 20px;
         }
+
+        &.empty {
+          color: hsl(var(--clr-secondary-500));
+        }
       }
     }
 
@@ -218,8 +222,6 @@
         }
       }
     }
-
-
   }
 
   .bottom-panel {

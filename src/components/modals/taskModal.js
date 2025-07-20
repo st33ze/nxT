@@ -571,6 +571,7 @@ class TaskDate {
 
   #createButton() {
     const button = createNode('button', {
+      class: 'empty',
       'aria-expanded': 'false',
       'aria-controls': 'task-date-input',
     });
@@ -589,9 +590,15 @@ class TaskDate {
   #createInput() {
     const input = createNode('input', {
       id: 'task-date-input',
+      class: 'empty',
       type: 'date',
     });
     
+    input.addEventListener('change', () => {
+      input.classList.toggle('empty', !input.value);
+      this.#button.classList.toggle('empty', !input.value);
+    });
+
     return input;
   }
 
