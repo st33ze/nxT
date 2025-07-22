@@ -602,6 +602,16 @@ class TaskDate {
     return input;
   }
 
+  /** @param {Date} date */
+  set value(date) {
+    if (date) {
+      this.#input.value = date;
+    } else {
+      this.#input.value = '';
+    }
+    this.#input.dispatchEvent(new Event('change'));
+  }
+
   get button() {
     return this.#button;
   }
