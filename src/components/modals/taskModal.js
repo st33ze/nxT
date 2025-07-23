@@ -1,5 +1,5 @@
 import './taskModal.css';
-import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
+import { createNode, normalizeInputValue, isButtonClicked } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, { EVENTS } from '../../utils/bus.js';
@@ -557,21 +557,17 @@ import bus, { EVENTS } from '../../utils/bus.js';
 class TaskDate {
   #button;
   #input;
-
-  static createLabel() {
-    const label = createNode('label', { for: 'task-date-input' });
-    label.textContent = 'Task date:';
-    return label;
-  }
+  #label;
 
   constructor() {
     this.#button = this.#createButton();
+    this.#label = this.#createLabel();
     this.#input = this.#createInput();
   }
 
   #createButton() {
     const button = createNode('button', {
-      class: 'empty',
+      class: 'input-empty',
       'aria-expanded': 'false',
       'aria-controls': 'task-date-input',
     });
@@ -587,19 +583,32 @@ class TaskDate {
     return button;
   }
 
+  #createLabel() {
+    const label = createNode('label', { for: 'task-date-input', hidden: '' });
+    label.textContent = 'Task date:';
+    return label;
+  }
+
   #createInput() {
     const input = createNode('input', {
       id: 'task-date-input',
-      class: 'empty',
+      class: 'input-empty',
       type: 'date',
+      hidden: '',
     });
     
     input.addEventListener('change', () => {
-      input.classList.toggle('empty', !input.value);
-      this.#button.classList.toggle('empty', !input.value);
+      input.classList.toggle('input-empty', !input.value);
+      this.#button.classList.toggle('input-empty', !input.value);
     });
 
     return input;
+  }
+
+  toggle() {
+    this.#label.toggleAttribute('hidden');
+    this.#input.toggleAttribute('hidden');
+    this.#button.classList.toggle('active');
   }
 
   /** @param {Date} date */
@@ -614,6 +623,10 @@ class TaskDate {
 
   get button() {
     return this.#button;
+  }
+
+  get label() {
+    return this.#label;
   }
 
   get input() {
@@ -680,17 +693,33 @@ export default class TaskModal {
 
   #createInputPanel() {
     const panel = createNode('div', { class: 'input-panel' });
+    const inputs = [
+      this.#inputs.date,
+    ];
 
-    const buttons = createNode('div', { class: 'input-panel--buttons' });
-    buttons.append(this.#inputs.date.button);
+    const buttonContainer = createNode('div', { class: 'input-panel--buttons' });
+    const inputContainer = createNode('div', { class: 'input-panel--inputs', hidden: '' });
+    
+    for (const input of inputs) {
+      buttonContainer.appendChild(input.button);
+      if (input.label) inputContainer.appendChild(input.label);
+      inputContainer.appendChild(input.input);
+    }
 
-    const inputs = createNode('div', { class: 'input-panel--inputs' });
-    inputs.append(
-      TaskDate.createLabel(),
-      this.#inputs.date.input
-    );
+    panel.append(buttonContainer, inputContainer);
 
-    panel.append(buttons, inputs);
+    panel.addEventListener('click', (e) => {
+      const button = e.target.closest('button');
+      if (button) {
+        const input = inputs.find(input => input.button === button);
+        if (input) {
+          input.toggle();
+          const inputVisible = !input.input.hidden;
+          inputContainer.toggleAttribute('hidden', !inputVisible);
+          button.setAttribute('aria-expanded', String(inputVisible));
+        }
+      }
+    });
 
     return panel;
   }

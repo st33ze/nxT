@@ -196,17 +196,25 @@
           height: 20px;
         }
 
-        &.empty {
+        &.input-empty {
           color: hsl(var(--clr-secondary-500));
+        }
+
+        &.active {
+          background-color: hsl(var(--bg-primary-400));
         }
       }
     }
 
     .input-panel--inputs {
-      display: flex;
-      align-items: center;
+      display: none;
       min-height: 60px;
+      align-items: center;
       padding-inline: 0.5rem;
+      
+      &:not([hidden]) {
+        display: flex;
+      }
 
       input[type="date"] {
         padding: 0.25rem 0.5rem;
@@ -217,7 +225,7 @@
         border: 1px solid hsl(var(--clr-secondary-500) / 0.5);
         border-radius: 0.5rem;
 
-        &.empty {
+        &.input-empty {
           color: hsl(var(--clr-secondary-500));
         }
       }
