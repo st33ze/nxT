@@ -556,13 +556,13 @@ import bus, { EVENTS } from '../../utils/bus.js';
 
 class TaskDate {
   #button;
-  #input;
+  #field;
   #label;
 
   constructor() {
     this.#button = this.#createButton();
     this.#label = this.#createLabel();
-    this.#input = this.#createInput();
+    this.#field = this.#createField();
   }
 
   #createButton() {
@@ -588,7 +588,7 @@ class TaskDate {
     return label;
   }
 
-  #createInput() {
+  #createField() {
     const input = createNode('input', {
       id: 'task-date-input',
       type: 'date',
@@ -605,17 +605,17 @@ class TaskDate {
 
   toggle() {
     this.#label.toggleAttribute('hidden');
-    this.#input.toggleAttribute('hidden');
+    this.#field.toggleAttribute('hidden');
   }
 
   /** @param {Date} date */
   set value(date) {
     if (date) {
-      this.#input.value = date;
+      this.#field.value = date;
     } else {
-      this.#input.value = '';
+      this.#field.value = '';
     }
-    this.#input.dispatchEvent(new Event('change'));
+    this.#field.dispatchEvent(new Event('change'));
   }
 
   get button() {
@@ -700,7 +700,7 @@ export default class TaskModal {
     for (const input of inputs) {
       buttonContainer.appendChild(input.button);
       if (input.label) inputContainer.appendChild(input.label);
-      inputContainer.appendChild(input.input);
+      inputContainer.appendChild(input.field);
     }
 
     panel.append(buttonContainer, inputContainer);
@@ -711,7 +711,7 @@ export default class TaskModal {
         const input = inputs.find(input => input.button === button);
         if (input) {
           input.toggle();
-          const inputVisible = !input.input.hidden;
+          const inputVisible = !input.field.hidden;
           inputContainer.toggleAttribute('hidden', !inputVisible);
           button.setAttribute('aria-expanded', String(inputVisible));
         }
