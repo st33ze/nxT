@@ -192,6 +192,10 @@
         color: hsl(var(--clr-secondary-500));
         background-color: hsl(var(--bg-primary-500));
         
+        &[aria-expanded='true'] {
+          background-color: hsl(var(--clr-primary-400));
+        }
+
         svg {
           width: 20px;
           height: 20px;
@@ -199,10 +203,6 @@
 
         &.input-filled {
           color: inherit;
-        }
-
-        &.active {
-          background-color: hsl(var(--bg-primary-400));
         }
       }
     }

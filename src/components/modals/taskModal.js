@@ -606,7 +606,6 @@ class TaskDate {
   toggle() {
     this.#label.toggleAttribute('hidden');
     this.#input.toggleAttribute('hidden');
-    this.#button.classList.toggle('active');
   }
 
   /** @param {Date} date */
