@@ -1,8 +1,9 @@
 import './taskModal.css';
-import { createNode, normalizeInputValue, isButtonClicked } from '../../utils/domUtils.js';
+import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, { EVENTS } from '../../utils/bus.js';
+import SelectField from '../common/SelectField.js';
 
 // class ContentEditable {
 //   #node;
@@ -626,8 +627,49 @@ class TaskDate {
     return this.#label;
   }
 
-  get input() {
-    return this.#input;
+  get field() {
+    return this.#field;
+  }
+}
+
+class TaskPriority {
+  static PRIORITY_OPTIONS = ['low', 'medium', 'high'];
+  #button;
+  #field;
+
+  constructor() {
+    this.#button = this.#createButton();
+    this.#field = new SelectField(TaskPriority.PRIORITY_OPTIONS);
+    this.field.hidden = true;
+  }
+
+  #createButton() {
+    const button = createNode('button', {
+      'aria-expanded': 'false',
+      'aria-controls': 'task-priority-input',
+    });
+    
+    const icon = createNode('span', {'aria-hidden': 'true'});
+    icon.appendChild(createSVGElement('priority'));
+    
+    const text = createNode('span', {class: 'priority-text'});
+    text.textContent = 'Priority';
+    
+    button.append(icon, text);
+    
+    return button;
+  }
+
+  toggle() {
+    this.field.toggleAttribute('hidden');
+  }
+
+  get button() {
+    return this.#button;
+  }
+
+  get field() {
+    return this.#field.node;
   }
 }
 
@@ -681,10 +723,10 @@ export default class TaskModal {
     });
 
     const date = new TaskDate();
-
+    const priority = new TaskPriority();
     const completed = new TaskCheckbox();
 
-    this.#inputs = { title, description, date, completed };
+    this.#inputs = { title, description, date, priority, completed };
   }
 
 
@@ -692,6 +734,7 @@ export default class TaskModal {
     const panel = createNode('div', { class: 'input-panel' });
     const inputs = [
       this.#inputs.date,
+      this.#inputs.priority,
     ];
 
     const buttonContainer = createNode('div', { class: 'input-panel--buttons' });
