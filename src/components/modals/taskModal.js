@@ -607,6 +607,7 @@ class TaskDate {
   toggle() {
     this.#label.toggleAttribute('hidden');
     this.#field.toggleAttribute('hidden');
+    this.#button.setAttribute('aria-expanded', String(!this.#field.hidden));
   }
 
   /** @param {Date} date */
@@ -662,6 +663,7 @@ class TaskPriority {
 
   toggle() {
     this.field.toggleAttribute('hidden');
+    this.button.setAttribute('aria-expanded', String(!this.field.hidden));
   }
 
   get button() {
@@ -749,16 +751,18 @@ export default class TaskModal {
     panel.append(buttonContainer, inputContainer);
 
     panel.addEventListener('click', (e) => {
-      const button = e.target.closest('button');
-      if (button) {
-        const input = inputs.find(input => input.button === button);
-        if (input) {
-          input.toggle();
-          const inputVisible = !input.field.hidden;
-          inputContainer.toggleAttribute('hidden', !inputVisible);
-          button.setAttribute('aria-expanded', String(inputVisible));
-        }
-      }
+      const button = e.target.closest('.input-panel--buttons button');
+
+      if (!button) return;
+        
+      const activeInput = inputs.find(input => !input.field.hidden);
+      const input = inputs.find(input => input.button === button);
+      
+      activeInput?.toggle();
+
+      if (input !== activeInput) input.toggle();
+
+      inputContainer.hidden = input.field.hidden;    
     });
 
     return panel;
