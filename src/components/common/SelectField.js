@@ -31,8 +31,8 @@ export default class SelectField {
   }
 
   #selectBtn(button) {
-    if (!button) return;
     this.#selectedBtn?.setAttribute('aria-pressed', 'false');
+    
     if (this.#selectedBtn === button) {
       this.#selectedBtn = null;
     } else {
@@ -41,9 +41,23 @@ export default class SelectField {
     }
   }
 
+  #emitChange() {
+    const event = new CustomEvent('change', {
+      detail: { value: this.value },
+    });
+    this.#field.dispatchEvent(event);
+  }
+
   #clickHandler(event) {
     const button = event.target.closest('.select-field--option');
+    if (!button) return;
+
     this.#selectBtn(button);
+    this.#emitChange();
+  }
+
+  get value() {
+    return this.#selectedBtn?.dataset.value || null;
   }
 
   get node() {
