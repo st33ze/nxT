@@ -55,6 +55,11 @@ export default class SelectField {
     this.#selectBtn(button);
     this.#emitChange();
   }
+  
+  set value(value) {
+    const button = this.#field.querySelector(`.select-field--option[data-value="${value}"]`);
+    if (button) this.#selectBtn(button);
+  }
 
   get value() {
     return this.#selectedBtn?.dataset.value || null;
