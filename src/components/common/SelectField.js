@@ -32,13 +32,9 @@ export default class SelectField {
 
   #selectBtn(button) {
     this.#selectedBtn?.setAttribute('aria-pressed', 'false');
-    
-    if (this.#selectedBtn === button) {
-      this.#selectedBtn = null;
-    } else {
-      this.#selectedBtn = button;
-      button.setAttribute('aria-pressed', 'true');
-    }
+    this.#selectedBtn = button ?? null;
+
+    button?.setAttribute('aria-pressed', 'true');
   }
 
   #emitChange() {
@@ -58,7 +54,7 @@ export default class SelectField {
   
   set value(value) {
     const button = this.#field.querySelector(`.select-field--option[data-value="${value}"]`);
-    if (button) this.#selectBtn(button);
+    this.#selectBtn(button);
   }
 
   get value() {
