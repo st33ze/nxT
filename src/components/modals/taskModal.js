@@ -640,14 +640,14 @@ class TaskPriority {
 
   constructor() {
     this.#button = this.#createButton();
-    this.#field = new SelectField(TaskPriority.PRIORITY_OPTIONS);
-    this.field.hidden = true;
+    this.#field = this.#createField();
   }
 
   #createButton() {
     const button = createNode('button', {
       'aria-expanded': 'false',
       'aria-controls': 'task-priority-input',
+      'data-priority': '',
     });
     
     const icon = createNode('span', {'aria-hidden': 'true'});
@@ -659,6 +659,17 @@ class TaskPriority {
     button.append(icon, text);
     
     return button;
+  }
+
+  #createField() {
+    const field = new SelectField(TaskPriority.PRIORITY_OPTIONS);
+    field.node.hidden = true;
+
+    field.node.addEventListener('change', (e) => {
+      this.#button.dataset.priority = e.detail.value || '';
+    });
+
+    return field;
   }
 
   toggle() {
@@ -752,12 +763,12 @@ export default class TaskModal {
 
     panel.addEventListener('click', (e) => {
       const button = e.target.closest('.input-panel--buttons button');
-
       if (!button) return;
         
       const activeInput = inputs.find(input => !input.field.hidden);
       const input = inputs.find(input => input.button === button);
       
+      console.log('activeInput:', activeInput, 'input:', input);
       activeInput?.toggle();
 
       if (input !== activeInput) input.toggle();

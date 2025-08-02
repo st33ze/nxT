@@ -204,6 +204,18 @@
         &.input-filled {
           color: inherit;
         }
+
+        &[aria-controls='task-priority-input'] {
+          &[data-priority='low'] {
+            color: hsl(var(--clr-prio-low));
+          }
+          &[data-priority='medium'] {
+            color: hsl(var(--clr-prio-medium));
+          }
+          &[data-priority='high'] {
+            color: hsl(var(--clr-prio-high));
+          }
+        }
       }
     }
 
