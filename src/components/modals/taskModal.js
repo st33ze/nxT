@@ -677,6 +677,14 @@ class TaskPriority {
     this.button.setAttribute('aria-expanded', String(!this.field.hidden));
   }
 
+  /** @param {string} priority */
+  set value(priority) {
+    const isValidPriority = TaskPriority.PRIORITY_OPTIONS.includes(priority);
+    this.#button.dataset.priority = isValidPriority ? priority : '';
+
+    this.#field.value = priority;
+  }
+
   get button() {
     return this.#button;
   }
@@ -768,7 +776,6 @@ export default class TaskModal {
       const activeInput = inputs.find(input => !input.field.hidden);
       const input = inputs.find(input => input.button === button);
       
-      console.log('activeInput:', activeInput, 'input:', input);
       activeInput?.toggle();
 
       if (input !== activeInput) input.toggle();
