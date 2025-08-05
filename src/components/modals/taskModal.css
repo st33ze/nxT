@@ -176,12 +176,13 @@
     display: flex;
     flex-direction: column;
     border: 1px solid hsl(var(--bg-primary-500));
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
 
     .input-panel--buttons {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       width: 100%;
+      background-color: hsl(var(--bg-primary-500));
 
       button {
         display: flex;
@@ -190,10 +191,10 @@
         gap: 0.25rem;
         padding-block: 0.25rem;
         color: hsl(var(--clr-secondary-500));
-        background-color: hsl(var(--bg-primary-500));
         
         &[aria-expanded='true'] {
-          background-color: hsl(var(--clr-primary-400));
+          background-color: hsl(var(--bg-primary-400));
+          border-radius: 0.5rem 0.5rem 0 0;
         }
 
         svg {
