@@ -6,28 +6,16 @@ export default class SelectField {
   #selectedBtn;
 
   constructor(options) {
-    this.#field = SelectField.createSelectField(options);
+    this.#field = SelectField.createSelectField();
+    this.populate(options);
     this.#field.addEventListener('click', this.#clickHandler.bind(this));
   }
 
-  static createSelectField(options) {
-    const field = createNode('div', {
+  static createSelectField() {
+    return createNode('div', {
       class: 'select-field',
       role: 'group',
     });
-
-    options.forEach(option => {
-      const button = createNode('button', {
-        type: 'button',
-        class: 'select-field--option',
-        'aria-pressed': 'false',
-        'data-value': option,
-      });
-      button.textContent = option;
-      field.appendChild(button);
-    });
-
-    return field;
   }
 
   #selectBtn(button) {
@@ -52,6 +40,21 @@ export default class SelectField {
     this.#emitChange();
   }
   
+  populate(options) {
+    if (!Array.isArray(options) || options.length === 0) return;
+
+    options.forEach(option => {
+      const button = createNode('button', {
+        type: 'button',
+        class: 'select-field--option',
+        'aria-pressed': 'false',
+        'data-value': option,
+      });
+      button.textContent = option;
+      this.#field.appendChild(button);
+    });
+  }
+
   set value(value) {
     const button = this.#field.querySelector(`.select-field--option[data-value="${value}"]`);
     this.#selectBtn(button);
