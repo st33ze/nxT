@@ -32,9 +32,9 @@ export default class SelectField {
 
   #selectBtn(button) {
     this.#selectedBtn?.setAttribute('aria-pressed', 'false');
-    this.#selectedBtn = button ?? null;
+    this.#selectedBtn = this.#selectedBtn === button ? null : button;
 
-    button?.setAttribute('aria-pressed', 'true');
+    this.#selectedBtn?.setAttribute('aria-pressed', 'true');
   }
 
   #emitChange() {
