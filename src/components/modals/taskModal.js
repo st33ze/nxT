@@ -4,6 +4,7 @@ import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, { EVENTS } from '../../utils/bus.js';
 import SelectField from '../common/SelectField.js';
+import db from '../../utils/dbManager.js';
 
 // class ContentEditable {
 //   #node;
@@ -694,6 +695,63 @@ class TaskPriority {
   }
 }
 
+class TaskProject {
+  #button;
+  #field;
+  #projects;
+
+  constructor() {
+    this.#button = this.#createButton();
+    this.#field = this.#createField();
+  }
+
+  #createButton() {
+    const button = createNode('button', {
+      'aria-expanded': 'false',
+      'aria-controls': 'task-project-input',
+    });
+    
+    const icon = createNode('span', {'aria-hidden': 'true'});
+    icon.appendChild(createSVGElement('projects'));
+    
+    const text = createNode('span', {class: 'project-text'});
+    text.textContent = 'Project';
+    
+    button.append(icon, text);
+    
+    return button;
+  }
+
+  async #loadProjects() {
+    this.#projects = await db.getStoreItems('projects');
+  }
+
+  #createField() {
+    const field = new SelectField();
+    field.node.hidden = true;
+    field.node.classList.add('project-select');
+
+    this.#loadProjects().then(() => {
+      field.populate(this.#projects.map(project => project.title));
+    });
+
+    return field;
+  }
+
+  toggle() {
+    this.field.toggleAttribute('hidden');
+    this.button.setAttribute('aria-expanded', String(!this.field.hidden));
+  }
+
+  get button() {
+    return this.#button;
+  }
+
+  get field() {
+    return this.#field.node;
+  }
+}
+
 class TaskCheckbox {
   #node;
 
@@ -745,9 +803,10 @@ export default class TaskModal {
 
     const date = new TaskDate();
     const priority = new TaskPriority();
+    const project = new TaskProject();
     const completed = new TaskCheckbox();
 
-    this.#inputs = { title, description, date, priority, completed };
+    this.#inputs = { title, description, date, priority, project, completed };
   }
 
 
@@ -756,6 +815,7 @@ export default class TaskModal {
     const inputs = [
       this.#inputs.date,
       this.#inputs.priority,
+      this.#inputs.project,
     ];
 
     const buttonContainer = createNode('div', { class: 'input-panel--buttons' });
