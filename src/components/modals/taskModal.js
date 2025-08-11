@@ -735,6 +735,10 @@ class TaskProject {
       field.populate(this.#projects.map(project => project.title));
     });
 
+    field.node.addEventListener('change', (e) => {
+      this.#button.classList.toggle('input-filled', e.detail.value);
+    });
+
     return field;
   }
 
