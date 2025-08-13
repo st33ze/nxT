@@ -20,9 +20,10 @@ export default class SelectField {
 
   #selectBtn(button) {
     this.#selectedBtn?.setAttribute('aria-pressed', 'false');
-    this.#selectedBtn = this.#selectedBtn === button ? null : button;
+    button?.setAttribute('aria-pressed', 'true');
+    this.#selectedBtn = button;
 
-    this.#selectedBtn?.setAttribute('aria-pressed', 'true');
+    this.#emitChange();
   }
 
   #emitChange() {
@@ -36,8 +37,7 @@ export default class SelectField {
     const button = event.target.closest('.select-field--option');
     if (!button) return;
 
-    this.#selectBtn(button);
-    this.#emitChange();
+    this.#selectBtn(button === this.#selectedBtn ? null : button);
   }
   
   populate(options) {
@@ -57,7 +57,7 @@ export default class SelectField {
 
   set value(value) {
     const button = this.#field.querySelector(`.select-field--option[data-value="${value}"]`);
-    this.#selectBtn(button);
+    if (button !== this.#selectedBtn) this.#selectBtn(button);
   }
 
   get value() {
