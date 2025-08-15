@@ -663,7 +663,9 @@ class TaskPriority {
   }
 
   #createField() {
-    const field = new SelectField(TaskPriority.PRIORITY_OPTIONS);
+    const field = new SelectField(
+      TaskPriority.PRIORITY_OPTIONS.map(option => ({ value: option }))
+    );
     field.node.hidden = true;
 
     field.node.addEventListener('change', (e) => {
@@ -732,7 +734,12 @@ class TaskProject {
     field.node.classList.add('project-select');
 
     this.#loadProjects().then(() => {
-      field.populate(this.#projects.map(project => project.title));
+      field.populate(
+        this.#projects.map(project => ({
+          value: project.id,
+          label: project.title,
+        }))
+      );
     });
 
     field.node.addEventListener('change', (e) => {

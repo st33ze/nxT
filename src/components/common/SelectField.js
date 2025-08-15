@@ -40,17 +40,18 @@ export default class SelectField {
     this.#selectBtn(button === this.#selectedBtn ? null : button);
   }
   
+  /** @param {Array} options - Array of objects with `value` and optional `label` properties */
   populate(options) {
-    if (!Array.isArray(options) || options.length === 0) return;
+    if (!Array.isArray(options)) return;
 
     options.forEach(option => {
       const button = createNode('button', {
         type: 'button',
         class: 'select-field--option',
         'aria-pressed': 'false',
-        'data-value': option,
+        'data-value': option.value,
       });
-      button.textContent = option;
+      button.textContent = option.label || option.value;
       this.#field.appendChild(button);
     });
   }
