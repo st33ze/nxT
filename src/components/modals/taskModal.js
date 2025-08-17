@@ -787,6 +787,15 @@ class TaskCheckbox {
   }
 }
 
+const INPUT_TO_TASK_KEY = {
+  title: 'title',
+  description: 'description',
+  date: 'date',
+  priority: 'priority',
+  project: 'projectId',
+  completed: 'completed',
+};
+
 export default class TaskModal {
   #node;
   #inputs;
