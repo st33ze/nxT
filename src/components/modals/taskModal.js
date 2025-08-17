@@ -700,7 +700,6 @@ class TaskPriority {
 class TaskProject {
   #button;
   #field;
-  #projects;
 
   constructor() {
     this.#button = this.#createButton();
@@ -724,8 +723,8 @@ class TaskProject {
     return button;
   }
 
-  async #loadProjects() {
-    this.#projects = await db.getStoreItems('projects');
+  #loadProjects() {
+    return db.getStoreItems('projects');
   }
 
   #createField() {
@@ -733,20 +732,21 @@ class TaskProject {
     field.node.hidden = true;
     field.node.classList.add('project-select');
 
-    this.#loadProjects().then(() => {
-      field.populate(
-        this.#projects.map(project => ({
-          value: project.id,
-          label: project.title,
-        }))
-      );
-    });
-
     field.node.addEventListener('change', (e) => {
       this.#button.classList.toggle('input-filled', e.detail.value);
     });
 
     return field;
+  }
+
+  async init() {
+    const projects = await this.#loadProjects();
+    this.#field.populate(
+      projects.map(project => ({
+        value: project.id,
+        label: project.title,
+      }))
+    );
   }
 
   toggle() {
@@ -795,11 +795,9 @@ export default class TaskModal {
 
   constructor() {
     this.#node = createNode('div', { class: 'task-modal' });
-
-    this.#init();
   }
 
-  #createInputs() {
+  async #createInputs() {
     const title = new ContentEditable('h2', {
       placeholder: 'Task title',
       'aria-required': 'true',
@@ -816,6 +814,8 @@ export default class TaskModal {
     const priority = new TaskPriority();
     const project = new TaskProject();
     const completed = new TaskCheckbox();
+
+    await project.init();
 
     this.#inputs = { title, description, date, priority, project, completed };
   }
@@ -893,8 +893,8 @@ export default class TaskModal {
     return panel;
   }
 
-  #init() {
-    this.#createInputs();
+  async init() {
+    await this.#createInputs();
 
     const textSection = createNode('div', { class: 'text-section' });
     const {title, description} = this.#inputs;
