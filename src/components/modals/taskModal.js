@@ -919,6 +919,7 @@ export default class TaskModal {
 
   render(task = {}) {
     this.#node.classList.toggle('new-task', task.id == null);
+    this.#buttons.save.disabled = this.#isTaskNew();
     this.#id = task.id;
 
     this.#fillInputs(task);
