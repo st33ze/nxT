@@ -912,13 +912,16 @@ export default class TaskModal {
     this.#node.append(textSection, this.#createInputPanel(), this.#createBottomPanel());
   }
 
+  #fillInputs(task) {
+    for (const key in this.#inputs)
+      this.#inputs[key].value = task[INPUT_TO_TASK_KEY[key]];
+  }
+
   render(task = {}) {
     this.#node.classList.toggle('new-task', task.id == null);
     this.#id = task.id;
 
-    for (const input in this.#inputs) {
-      this.#inputs[input].value = task[input];
-    }
+    this.#fillInputs(task);
   }
 
   get task() {
