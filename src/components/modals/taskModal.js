@@ -945,7 +945,7 @@ export default class TaskModal {
   get task() {
     const task = {};
     for (const key in this.#inputs) {
-      task[key] = normalizeInputValue(this.#inputs[key].value);
+      task[INPUT_TO_TASK_KEY[key]] = normalizeInputValue(this.#inputs[key].value);
     }
     if (!this.#isTaskNew()) {
       task.id = this.#id;
