@@ -754,6 +754,11 @@ class TaskProject {
     this.button.setAttribute('aria-expanded', String(!this.field.hidden));
   }
 
+  /** @param {number} projectID */
+  set value(projectID) {
+    this.#field.value = projectID;
+  }
+
   get button() {
     return this.#button;
   }
