@@ -621,6 +621,10 @@ class TaskDate {
     this.#field.dispatchEvent(new Event('change'));
   }
 
+  get value() {
+    return this.#field.value;
+  }
+
   get button() {
     return this.#button;
   }
@@ -686,6 +690,10 @@ class TaskPriority {
     this.#button.dataset.priority = isValidPriority ? priority : '';
 
     this.#field.value = priority;
+  }
+
+  get value() {
+    return this.#field.value;
   }
 
   get button() {
@@ -757,6 +765,10 @@ class TaskProject {
   /** @param {number} projectID */
   set value(projectID) {
     this.#field.value = projectID;
+  }
+
+  get value() {
+    return this.#field.value ? Number(this.#field.value) : null;
   }
 
   get button() {
