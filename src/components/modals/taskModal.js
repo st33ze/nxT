@@ -1,5 +1,5 @@
 import './taskModal.css';
-import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
+import { createNode } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import bus, { EVENTS } from '../../utils/bus.js';
@@ -340,7 +340,7 @@ export default class TaskModal {
   get task() {
     const task = {};
     for (const key in this.#inputs) {
-      task[INPUT_TO_TASK_KEY[key]] = normalizeInputValue(this.#inputs[key].value);
+      task[INPUT_TO_TASK_KEY[key]] = this.#inputs[key].value;
     }
     if (!this.#isTaskNew()) {
       task.id = this.#id;

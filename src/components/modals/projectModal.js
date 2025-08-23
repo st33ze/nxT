@@ -1,5 +1,5 @@
 import './projectModal.css';
-import { createNode, normalizeInputValue } from '../../utils/domUtils.js';
+import { createNode } from '../../utils/domUtils.js';
 import ContentEditable from './components/ContentEditable.js';
 import { createSVGElement } from '../../assets/icons.js';
 import { TaskList } from '../common/taskList.js';
@@ -266,7 +266,7 @@ export default class ProjectModal {
   get project() {
     const project = {};
     for (const key in this.#inputs) {
-      project[key] = normalizeInputValue(this.#inputs[key].value);
+      project[key] = this.#inputs[key].value;
     }
     if (this.#id) project.id = this.#id;
 
