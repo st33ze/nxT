@@ -36,6 +36,10 @@ export default class Today {
     return date.toLocaleDateString('en-CA');
   }
   
+  #isTodayDate(date) {
+    return date === this.#getTodayStringDate();
+  }
+
   #addEventListeners() {
     bus.on(
       EVENTS.TASKS_LIST.TASK_DETAILS, 
@@ -46,12 +50,12 @@ export default class Today {
     );
 
     bus.on(
-      EVENTS.TASK.SAVE, 
+      EVENTS.TASK.EDIT,
       (task) => {
-        if (task.id) {
-          task.date === this.#getTodayStringDate()
-            ? this.#taskList.save(task)
-            : this.#taskList.delete(task.id);
+        if (this.#isTodayDate(task.date)) {
+          this.#taskList.save(task);
+        } else {
+          this.#taskList.delete(task.id);
         }
       },
       {clearOnReload: true}
@@ -60,8 +64,7 @@ export default class Today {
     bus.on(
       EVENTS.DATABASE.TASK_ADDED, 
       (task) => {
-        if (task.date === this.#getTodayStringDate()) 
-          this.#taskList.save(task);
+        if (this.#isTodayDate(task.date)) this.#taskList.save(task);
       },
       {clearOnReload: true}
     );

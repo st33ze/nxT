@@ -39,10 +39,8 @@ export default class Inbox {
     );
 
     bus.on(
-      EVENTS.TASK.SAVE, 
-      (task) => {
-        if (task.id) this.#tasksLists.save(task);
-      },
+      EVENTS.TASK.EDIT,
+      (task) => this.#tasksLists.save(task),
       {clearOnReload: true}
     );
 
