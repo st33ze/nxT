@@ -211,6 +211,7 @@ const INPUT_TO_TASK_KEY = {
 export default class TaskModal {
   #node;
   #inputs;
+  #panelInputs;
   #buttons;
   #id;
 
@@ -239,16 +240,11 @@ export default class TaskModal {
     await project.init();
 
     this.#inputs = { title, description, date, priority, project, completed };
+    this.#panelInputs = [date, priority, project];
   }
 
   #toggleInputPanel(input) {
-    const inputs = [
-      this.#inputs.date,
-      this.#inputs.priority,
-      this.#inputs.project,
-    ];
-
-    const activeInput = inputs.find(input => !input.field.hidden);
+    const activeInput = this.#panelInputs.find(input => !input.field.hidden);
     activeInput?.toggle();
 
     if (input && (input !== activeInput)) input.toggle();
@@ -259,16 +255,10 @@ export default class TaskModal {
 
   #createInputPanel() {
     const panel = createNode('div', { class: 'input-panel' });
-    const inputs = [
-      this.#inputs.date,
-      this.#inputs.priority,
-      this.#inputs.project,
-    ];
-    
     const buttonContainer = createNode('div', { class: 'input-panel--buttons' });
     const inputContainer = createNode('div', { class: 'input-panel--inputs', hidden: '' });
     
-    for (const input of inputs) {
+    for (const input of this.#panelInputs) {
       buttonContainer.appendChild(input.button);
       if (input.label) inputContainer.appendChild(input.label);
       inputContainer.appendChild(input.field);
@@ -280,7 +270,7 @@ export default class TaskModal {
       const button = e.target.closest('.input-panel--buttons button');
       if (!button) return;
 
-      const input = inputs.find(input => input.button === button);
+      const input = this.#panelInputs.find(input => input.button === button);
       this.#toggleInputPanel(input);
     });
 
@@ -322,6 +312,11 @@ export default class TaskModal {
     this.#buttons = { save: saveBtn, delete: deleteBtn };
     return panel;
   }
+  
+  #fillInputs(task) {
+    for (const key in this.#inputs)
+      this.#inputs[key].value = task[INPUT_TO_TASK_KEY[key]];
+  }
 
   async init() {
     await this.#createInputs();
@@ -331,11 +326,6 @@ export default class TaskModal {
     textSection.append(title.node, description.node);
     
     this.#node.append(textSection, this.#createInputPanel(), this.#createBottomPanel());
-  }
-
-  #fillInputs(task) {
-    for (const key in this.#inputs)
-      this.#inputs[key].value = task[INPUT_TO_TASK_KEY[key]];
   }
 
   render(task = {}) {
