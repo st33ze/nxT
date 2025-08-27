@@ -55,3 +55,12 @@ export function getInsertIndex(sortedEntries, newDate) {
 
   return left;
 }
+
+export function getTodayStringDate() {
+  const date = new Date();
+  return date.toLocaleDateString('en-CA');
+}
+
+export function isTodayDate(date) {
+  return date === getTodayStringDate();
+}

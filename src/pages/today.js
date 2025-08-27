@@ -1,5 +1,6 @@
 import { createNode } from '../utils/domUtils.js';
 import { createHeader, openModal } from '../utils/pageUtils.js';
+import { getTodayStringDate, isTodayDate } from '../utils/taskUtils.js';
 import AddButton from '../components/common/addButton.js';
 import { TaskList } from '../components/common/taskList.js';
 import bus, { EVENTS } from '../utils/bus.js';
@@ -16,7 +17,7 @@ export default class Today {
     const pageContent = createNode('div', {class: 'page-content'});
     const addButton = new AddButton(
       'Add a task',
-      () => openModal(MODAL_CONTENT.TASK, {date: this.#getTodayStringDate()})
+      () => openModal(MODAL_CONTENT.TASK, {date: getTodayStringDate()})
     );
     pageContent.append(createHeader('today'), addButton.node);
 
@@ -29,15 +30,6 @@ export default class Today {
     }).catch((error) => {
       console.error('Error loading tasks:', error);
     });
-  }
-    
-  #getTodayStringDate() {
-    const date = new Date();
-    return date.toLocaleDateString('en-CA');
-  }
-  
-  #isTodayDate(date) {
-    return date === this.#getTodayStringDate();
   }
 
   #addEventListeners() {
@@ -52,7 +44,7 @@ export default class Today {
     bus.on(
       EVENTS.TASK.EDIT,
       (task) => {
-        if (this.#isTodayDate(task.date)) {
+        if (isTodayDate(task.date)) {
           this.#taskList.save(task);
         } else {
           this.#taskList.delete(task.id);
@@ -64,7 +56,7 @@ export default class Today {
     bus.on(
       EVENTS.DATABASE.TASK_ADDED, 
       (task) => {
-        if (this.#isTodayDate(task.date)) this.#taskList.save(task);
+        if (isTodayDate(task.date)) this.#taskList.save(task);
       },
       {clearOnReload: true}
     );
@@ -77,7 +69,7 @@ export default class Today {
   }
 
   async #loadTasksFromDB() {
-    const dateString = this.#getTodayStringDate();
+    const dateString = getTodayStringDate();
     const tasks = await db.getTasksByIndex('byDate', dateString);
 
     return tasks;
