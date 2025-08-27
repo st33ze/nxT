@@ -183,7 +183,7 @@ export default class ProjectModal {
   }
 
   #isProjectNew() {
-    return !this.#id;
+    return this.#node.classList.contains('new-project');
   }
 
   #createButtonPanel() {
@@ -209,7 +209,7 @@ export default class ProjectModal {
     });
     deleteBtn.appendChild(createSVGElement('delete'));
     deleteBtn.addEventListener('click', () => {
-      bus.emit(EVENTS.PROJECT.DELETE, this.project.id);
+      bus.emit(EVENTS.PROJECT.DELETE, this.#id);
       bus.emit(EVENTS.MODAL.CONTENT_CLOSE);
     });
 
@@ -246,15 +246,10 @@ export default class ProjectModal {
     );
   }
 
-  #adjustButtons(isProjectNew) {
-    this.#buttons.save.disabled = isProjectNew;
-    this.#buttons.delete.style.display = isProjectNew ? 'none': 'block';
-    this.#buttons.addTask.style.display = isProjectNew ? 'none': 'block';
-  }
-
   render(project={}) {
+    this.#node.classList.toggle('new-project', project.id == null);
+    this.#buttons.save.disabled = this.#isProjectNew();
     this.#id = project.id;
-    this.#adjustButtons(this.#isProjectNew());
 
     for (const input in this.#inputs) {
       this.#inputs[input].value = project[input];

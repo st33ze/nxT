@@ -90,7 +90,6 @@
       }
     }
     .delete-btn {
-      display: none;
       padding: 0 0.3rem;
       color: hsl(var(--clr-prio-high));
       border-color: hsl(var(--clr-prio-high));
@@ -106,6 +105,15 @@
       svg {
         width: 32px;
         height: 32px;
+      }
+    }
+  }
+
+  &.new-project {
+    .button-panel {
+      .add-task--btn,
+      .delete-btn {
+        display: none;
       }
     }
   }
