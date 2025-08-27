@@ -241,6 +241,21 @@ export default class TaskModal {
     this.#inputs = { title, description, date, priority, project, completed };
   }
 
+  #toggleInputPanel(input) {
+    const inputs = [
+      this.#inputs.date,
+      this.#inputs.priority,
+      this.#inputs.project,
+    ];
+
+    const activeInput = inputs.find(input => !input.field.hidden);
+    activeInput?.toggle();
+
+    if (input && (input !== activeInput)) input.toggle();
+
+    const inputContainer = this.#node.querySelector('.input-panel--inputs');
+    inputContainer.hidden = !input || input.field.hidden;  
+  }
 
   #createInputPanel() {
     const panel = createNode('div', { class: 'input-panel' });
@@ -249,7 +264,7 @@ export default class TaskModal {
       this.#inputs.priority,
       this.#inputs.project,
     ];
-
+    
     const buttonContainer = createNode('div', { class: 'input-panel--buttons' });
     const inputContainer = createNode('div', { class: 'input-panel--inputs', hidden: '' });
     
@@ -264,15 +279,9 @@ export default class TaskModal {
     panel.addEventListener('click', (e) => {
       const button = e.target.closest('.input-panel--buttons button');
       if (!button) return;
-        
-      const activeInput = inputs.find(input => !input.field.hidden);
+
       const input = inputs.find(input => input.button === button);
-      
-      activeInput?.toggle();
-
-      if (input !== activeInput) input.toggle();
-
-      inputContainer.hidden = input.field.hidden;    
+      this.#toggleInputPanel(input);
     });
 
     return panel;
