@@ -246,15 +246,17 @@ export default class ProjectModal {
     );
   }
 
+  #fillInputs(project) {
+    for (const key in this.#inputs)
+      this.#inputs[key].value = project[key];
+  }
+
   render(project={}) {
     this.#node.classList.toggle('new-project', project.id == null);
     this.#buttons.save.disabled = this.#isProjectNew();
     this.#id = project.id;
 
-    for (const input in this.#inputs) {
-      this.#inputs[input].value = project[input];
-    }
-
+    this.#fillInputs(project);
     this.#taskSection.renderTasks(project.tasks, project.id);
   }
 
