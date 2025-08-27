@@ -84,16 +84,16 @@ export default class Modal {
   }
 
   #open(content) {
-      this.#node.querySelector('.modal-content')
-        .appendChild(content);
-      
-      if (!this.#node.classList.contains('open')) {
-        this.#node.classList.add('open');
-        this.#node.setAttribute('aria-hidden', 'false');
+    this.#node.querySelector('.modal-content')
+      .appendChild(content);
     
-        this.#node.querySelector('.close-btn').focus();
-      }
+    if (!this.#node.classList.contains('open')) {
+      this.#node.classList.add('open');
+      this.#node.setAttribute('aria-hidden', 'false');
+  
+      this.#node.querySelector('.close-btn').focus();
     }
+  }
   
   #close() {
     this.#node.classList.add('closing');
