@@ -112,15 +112,16 @@ class TaskSection {
     )
 
     bus.on(
-      EVENTS.TASK.CREATE,
+      EVENTS.DATABASE.TASK_ADDED,
       (task) => {
-        if (task.projectId === this.#projectId) {
+        if (task.projectId = this.#projectId) {
+          console.log(task);
           this.#taskList.save(task);
           this.#handleTaskListChange();
         }
       },
       {clearOnReload: true}
-    );
+    )
 
     bus.on(
       EVENTS.TASKS_LIST.TASK_DETAILS,
