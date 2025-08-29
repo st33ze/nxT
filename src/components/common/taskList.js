@@ -90,7 +90,6 @@ class TaskList {
       bus.emit(EVENTS.TASKS_LIST.TASK_DETAILS, id);
     } else if (TaskListItem.isCheckbox(e.target)) {
       task.completed = e.target.checked;
-      bus.emit(EVENTS.TASK.SAVE, task);
       bus.emit(EVENTS.TASK.EDIT, task);
     }
   }
