@@ -8,7 +8,9 @@ class ProjectCard {
   static create(project) {
     const card = createNode('article', {
       class: 'project-card no-tasks',
-      'data-project-id': project.id
+      'data-project-id': project.id,
+      tabindex: 0,
+      role: 'button'
     });
     
     card.append(
@@ -57,6 +59,12 @@ export default class ProjectList {
     });
     
     this.#node.addEventListener('click', this.#handleClickEvent);
+    this.#node.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.#handleClickEvent(e);
+      }
+    });
   }
   
   #handleClickEvent = (e) => {
