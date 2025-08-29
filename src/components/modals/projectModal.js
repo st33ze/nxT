@@ -163,8 +163,6 @@ export default class ProjectModal {
 
   constructor() {
     this.#node = createNode('div', { class: 'project-modal' });
-
-    this.#init();
   }
   
   #createInputs() {
@@ -230,7 +228,12 @@ export default class ProjectModal {
     return buttonPanel;
   }
 
-  #init() {
+  #fillInputs(project) {
+    for (const key in this.#inputs)
+      this.#inputs[key].value = project[key];
+  }
+
+  init() {
     this.#createInputs();
     
     const textSection = createNode('section', {class: 'text-section'});
@@ -244,11 +247,6 @@ export default class ProjectModal {
       this.#taskSection.node,
       this.#createButtonPanel()
     );
-  }
-
-  #fillInputs(project) {
-    for (const key in this.#inputs)
-      this.#inputs[key].value = project[key];
   }
 
   render(project={}) {

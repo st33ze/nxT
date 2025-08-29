@@ -75,7 +75,7 @@ export default class Modal {
     try {
       const module = await import(`./${name}.js`);
       const content = new module.default();
-      await content.init?.();
+      await content.init();
       this.#loadedContent.set(name, content);
       return content;
     } catch (error) {
