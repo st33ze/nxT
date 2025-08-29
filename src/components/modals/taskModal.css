@@ -110,10 +110,15 @@
   }
 
   .bottom-panel {
+    position: sticky;
+    bottom: 0;
     display: flex;
     justify-content: end;
     align-items: center;
     gap: 0.5rem;
+    padding-block: 0.5rem;
+    background-color: hsla(var(--bg-primary-400), 0.8);
+    backdrop-filter: blur(6px);
     button {
       border-radius: 0.5rem;
       border: 1px solid hsl(var(--clr-primary-500));

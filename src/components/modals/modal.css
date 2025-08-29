@@ -29,7 +29,6 @@ main {
   flex-direction: column;
   width: min(100%, 500px);
   max-height: 90%;
-  padding-bottom: 1rem;
   overflow-y: auto;
   z-index: 100;
   background-color: hsl(var(--bg-primary-400));
