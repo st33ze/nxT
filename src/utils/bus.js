@@ -50,11 +50,9 @@ export const EVENTS = {
   MODAL: {
     OPEN: 'modal:open',
     CLOSE: 'modal:close',
-    INPUT_CHANGE: 'modal:inputChange',
     CONTENT_CLOSE: 'modal:contentClose',
   },
   TASKS_LIST: {
-    MENU_CLOSE: 'tasksList:menuClose',
     TASK_DETAILS: 'taskList:taskDetails',
   },
   TASK: {
