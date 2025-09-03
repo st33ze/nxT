@@ -12,6 +12,7 @@ import db from '../../utils/dbManager.js';
 class TaskSection {
   #node;
   #taskList;
+  #header;
   #projectId
 
   constructor() {
@@ -21,13 +22,15 @@ class TaskSection {
     });
     
     this.#taskList = new TaskList();
+    this.#header = TaskSection.#createHeader();
 
-    this.#node.append(this.#createHeader(), this.#taskList.node);
+    this.#node.append(this.#header, this.#taskList.node);
 
+    this.#addHeaderListeners();
     this.#addTaskListListeners();
   }
 
-  #createHeader() {
+  static #createHeader() {
     const header = createNode('div', {
       class: 'task-section--header',
       role: 'button',
@@ -40,30 +43,32 @@ class TaskSection {
       ProgressIndicator.create()
     );
 
-    function toggleAccordion() {
-      this.#node.style.interpolateSize = 'allow-keywords';
-      
-      const isExpanded = this.#node.classList.contains('expanded');
-      this.#node.classList.toggle('expanded', !isExpanded);
-      this.#node.setAttribute('aria-expanded', !isExpanded);
-      
-      const label = isExpanded ? 'Show tasks': 'Hide tasks';
-      header.setAttribute('aria-label', label);
-      
-      this.#node.addEventListener('transitionend', () => {
-        this.#node.removeAttribute('style');
-      }, { once: true });
-    }
+    return header;
+  }
 
-    header.addEventListener('click', toggleAccordion.bind(this));
-    header.addEventListener('keydown', (e) => {
+  #toggleAccordion() {
+    this.#node.style.interpolateSize = 'allow-keywords';
+
+    const isExpanded = this.#node.classList.contains('expanded');
+    this.#node.classList.toggle('expanded', !isExpanded);
+    this.#node.setAttribute('aria-expanded', !isExpanded);
+
+    const label = isExpanded ? 'Show tasks': 'Hide tasks';
+    this.#header.setAttribute('aria-label', label);
+
+    this.#node.addEventListener('transitionend', () => {
+      this.#node.removeAttribute('style');
+    }, { once: true });
+  }
+
+  #addHeaderListeners() {
+    this.#header.addEventListener('click', this.#toggleAccordion.bind(this));
+    this.#header.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key   === ' ') {
         e.preventDefault();
-        toggleAccordion.call(this);
+        this.#toggleAccordion();
       }
     });
-    
-    return header;
   }
 
   #updateHeader(taskCount, projectProgress) {
