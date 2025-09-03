@@ -328,6 +328,10 @@ export default class TaskModal {
     this.#node.append(textSection, this.#createInputPanel(), this.#createBottomPanel());
   }
 
+  reset() {
+    this.#toggleInputPanel();
+  }
+
   render(task = {}) {
     this.#node.classList.toggle('new-task', task.id == null);
     this.#buttons.save.disabled = this.#isTaskNew();

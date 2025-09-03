@@ -155,6 +155,12 @@ class TaskSection {
     }
   }
 
+  closeAccordion() {
+    if (this.#node.classList.contains('expanded')) {
+      this.#toggleAccordion();
+    }
+  }
+
   get node() {
     return this.#node;
   }
@@ -253,6 +259,11 @@ export default class ProjectModal {
       this.#taskSection.node,
       this.#createButtonPanel()
     );
+  }
+
+  reset() {
+    // this.#taskSection.toggleAccordion(true);
+    this.#taskSection.closeAccordion();
   }
 
   render(project={}) {

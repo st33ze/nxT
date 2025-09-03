@@ -102,6 +102,7 @@ export default class Modal {
     setTimeout(() => {
       this.#node.classList.remove('open', 'closing');
       this.#node.querySelector('.modal-content').innerHTML = '';
+      for (const content of this.#loadedContent.values()) content.reset();
     }, 500);
   }
 
