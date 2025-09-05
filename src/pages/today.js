@@ -1,5 +1,5 @@
 import { createNode } from '../utils/domUtils.js';
-import { createHeader, openModal } from '../utils/pageUtils.js';
+import { createHeader, isModalOpen, openModal } from '../utils/pageUtils.js';
 import { getTodayStringDate, isTodayDate } from '../utils/taskUtils.js';
 import AddButton from '../components/common/addButton.js';
 import { TaskList } from '../components/common/taskList.js';
@@ -17,7 +17,10 @@ export default class Today {
     const pageContent = createNode('div', {class: 'page-content'});
     const addButton = new AddButton(
       'Add a task',
-      () => openModal(MODAL_CONTENT.TASK, {date: getTodayStringDate()})
+      () => {
+        if (isModalOpen()) return;
+        openModal(MODAL_CONTENT.TASK, {date: getTodayStringDate()})
+      }
     );
     pageContent.append(createHeader('today'), addButton.node);
 
@@ -36,6 +39,7 @@ export default class Today {
     bus.on(
       EVENTS.TASKS_LIST.TASK_DETAILS, 
       (id) => {
+        if (isModalOpen()) return;
         db.getEntity('tasks', id).then((task) => openModal(MODAL_CONTENT.TASK, task));
       },
       {clearOnReload: true}

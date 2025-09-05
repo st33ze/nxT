@@ -1,5 +1,5 @@
 import { createNode } from '../utils/domUtils.js';
-import { createHeader, openModal } from '../utils/pageUtils.js';
+import { createHeader, isModalOpen, openModal } from '../utils/pageUtils.js';
 import AddButton from '../components/common/addButton.js';
 import db from '../utils/dbManager.js';
 import ProjectList from '../components/common/projectList.js';
@@ -16,7 +16,10 @@ export default class Projects {
     const pageContent = createNode('div', {class: 'page-content'});
     const addButton = new AddButton(
       'Create new project',
-      () => openModal(MODAL_CONTENT.PROJECT)
+      () => {
+        if (isModalOpen()) return;
+        openModal(MODAL_CONTENT.PROJECT)
+      }
     );
     pageContent.append(createHeader('projects'), addButton.node);
 
@@ -36,6 +39,7 @@ export default class Projects {
     bus.on(
       EVENTS.PROJECT_LIST.PROJECT_DETAILS, 
       (id) => {
+        if (isModalOpen()) return;
         Promise.all([
           db.getEntity('projects', id),
           db.getTasksByIndex('byProjectId', id)

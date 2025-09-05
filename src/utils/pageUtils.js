@@ -9,17 +9,22 @@ export function createHeader(content) {
   return header;
 }
 
+export function isModalOpen() {
+  const modal = document.querySelector('.modal');
+  return modal.classList.contains('open');
+}
+
 export function openModal(type, data = {}) {
   bus.emit(EVENTS.MODAL.OPEN, {type, data});
   
   const caller = document.activeElement;
   const content = document.querySelector('.page-content');
-  content.setAttribute('inert', '');
+  content.inert = true;
 
   bus.on(
     EVENTS.MODAL.CLOSE, 
     () => {
-      content.removeAttribute('inert');
+      content.inert = false;
       caller?.focus();
     },
     {clearOnReload: true, once: true}
