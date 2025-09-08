@@ -246,6 +246,7 @@ class MultiTaskLists {
   deleteTask(id) {
     const taskList = this.#getListWithTaskId(id);
     taskList?.delete(id);
+    if (taskList?.isEmpty) this.#removeList(taskList);
   }
 
   get node() {
