@@ -86,13 +86,11 @@ export default class Modal {
   #open(content) {
     this.#node.querySelector('.modal-content')
       .appendChild(content);
-    
-    if (!this.#node.classList.contains('open')) {
-      this.#node.classList.add('open');
-      this.#node.setAttribute('aria-hidden', 'false');
   
-      this.#node.querySelector('.close-btn').focus();
-    }
+    this.#node.classList.add('open');
+    this.#node.setAttribute('aria-hidden', 'false');
+
+    this.#node.querySelector('.close-btn').focus();
   }
   
   #close() {
@@ -106,8 +104,13 @@ export default class Modal {
     }, 500);
   }
 
+  #isOpen() {
+    return this.#node.classList.contains('open');
+  }
+
   #addEventListeners() {
     bus.on(EVENTS.MODAL.OPEN, async (modal) => {
+      if (this.#isOpen()) return;
       const content = await this.#loadContent(modal.type);
       content.render(modal.data);
       this.#open(content.node);
