@@ -104,18 +104,20 @@ export default class Modal {
     }, 500);
   }
 
-  #isOpen() {
-    return this.#node.classList.contains('open');
+  #isClosing() {
+    return this.#node.classList.contains('closing');
   }
 
   #addEventListeners() {
     bus.on(EVENTS.MODAL.OPEN, async (modal) => {
-      if (this.#isOpen()) return;
+      if (this.#isClosing()) return;
       const content = await this.#loadContent(modal.type);
       content.render(modal.data);
       this.#open(content.node);
     }, {clearOnReload: true});
+    
     bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
+    
     bus.on(EVENTS.MODAL.CONTENT_CLOSE, () => {
       if (this.#loadedContent.size > 1) {
         this.#closeContent();
