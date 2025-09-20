@@ -65,6 +65,7 @@ const testProjects = [
 ];
 
 class Database {
+
   static DB_NAME = 'nxT-task-manager';
   static DB_VERSION = 1;
   static UPDATE_INTERVAL_IN_SEC = 30;
@@ -79,114 +80,6 @@ class Database {
 
     this.#addEventListeners();
     this.#startPerodicDatabaseUpdate();
-  }
-
-  #addEventListeners() {
-    bus.on(EVENTS.TASK.CREATE, (task) => {
-      this.#save('tasks', task).then((result) => {
-        bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
-      });
-    });
-
-    bus.on(EVENTS.TASK.EDIT, (task) => {
-      this.#unsavedChanges.tasks.set(task.id, task);
-    });
-
-    bus.on(EVENTS.TASK.DELETE, async (id) => {
-      const task = await this.getEntity('tasks', id);
-      if (task) {
-        task.deleted = true;
-        this.#unsavedChanges.tasks.set(id, task);
-      }
-    });
-    
-    bus.on(EVENTS.PROJECT.CREATE, async (project) => {
-      this.#save('projects', project).then((result) => {
-        bus.emit(EVENTS.DATABASE.PROJECT_ADDED, result[0]);
-      });
-    });
-
-    bus.on(EVENTS.PROJECT.EDIT, async (project) => {
-      this.#unsavedChanges.projects.set(project.id, project);
-    });
-
-    bus.on(EVENTS.PROJECT.DELETE, async (id) => {
-      const project = await this.getEntity('projects', id);
-      if (project) {
-        project.deleted = true;
-        this.#unsavedChanges.projects.set(id, project);
-      }
-    });
-
-    bus.on(EVENTS.PAGE.NAVIGATE, () => this.savePendingChanges());
-  }
-
-  #startPerodicDatabaseUpdate() {
-    setInterval(
-      () => this.savePendingChanges(), 
-      Database.UPDATE_INTERVAL_IN_SEC  * 1000
-    );
-  }
-
-  #getObjectStore(storeName, mode) {
-    const transaction = this.#db.transaction(storeName, mode);
-    return transaction.objectStore(storeName);
-  }
-
-  async #save(storeName, items) {
-    return new Promise((resolve, reject) => {
-      const store = this.#getObjectStore(storeName, 'readwrite');
-      const results = [];
-      const errors = [];
-
-      const itemsArray = Array.isArray(items) ? items: [items];
-
-      for (const item of itemsArray) {
-        const request = store.put(item);
-
-        request.onsuccess = (e) => {
-          const id = item.id ?? e.target.result;
-          results.push({...item, id});
-        };
-        request.onerror = (e) => errors.push({item, error: e.target.error });
-      }
-
-      store.transaction.oncomplete = () => {
-        console.log(`Saving operation for ${storeName} store completed with:`, results);
-        if (errors.length > 0) {
-          console.warn('Some items failed to save:', errors);
-        }
-        resolve(results);
-      };
-      store.transaction.onerror = (e) => {
-        console.error(`Failed while updating ${storeName}`, e);
-        reject();
-      };
-    });
-  }
-
-  #updateWithPendingChanges(items, storeName) {
-    const pendingChanges = this.#unsavedChanges[storeName]
-
-    pendingChanges.values().forEach(change => {
-      let left = 0, right = items.length - 1;
-      
-      while (left <= right) {
-        let mid = Math.floor((left + right) / 2);
-        const id = items[mid].id;
-
-        if (change.id < id) {
-          right = mid - 1;
-        } else if (change.id > id) {
-          left = mid + 1;
-        } else {
-          items[mid] = change;
-          break;
-        }
-      }
-    });
-
-    return items;
   }
 
   async init() {
@@ -242,18 +135,18 @@ class Database {
           reject(new Error(`Entity with id:${id} not found in ${storeName}`));
         }
       };
-
+      
       request.onerror = (e) =>
         reject(e.target.error);
     });
   }
-
+  
   async getTasksByIndex(indexName, value) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore('tasks', 'readonly');
 
       if (!store.indexNames.contains(indexName)) {
-        reject(new Error(`Index ${indexName} not found in tasks store`));
+        return reject(new Error(`Index ${indexName} not found in tasks store`));
       }
       
       const index = store.index(indexName);
@@ -262,8 +155,11 @@ class Database {
       const request = index.getAll(range);
 
       request.onsuccess = (e) => {
-        const updatedTasks = this.#updateWithPendingChanges(e.target.result, 'tasks');
-        resolve(updatedTasks.filter(task => !task.deleted));
+        const updatedTasks = this.#applyPendingChanges(
+          e.target.result,
+          this.#unsavedChanges['tasks']
+        );
+        resolve(updatedTasks);
       };
 
       request.onerror = (e) => {
@@ -271,15 +167,18 @@ class Database {
       };
     });
   }
-
+  
   async getStoreItems(storeName) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore(storeName, 'readonly');
       const request = store.getAll();
 
       request.onsuccess = (e) => {
-        const updatedItems = this.#updateWithPendingChanges(e.target.result, storeName);
-        resolve(updatedItems.filter(item => !item.deleted));
+        const updatedItems = this.#applyPendingChanges(
+          e.target.result, 
+          this.#unsavedChanges[storeName]
+        );
+        resolve(updatedItems);
       }
       request.onerror = (e) => {
         console.error(`Error while getting items from store: ${storeName}`, e.target.error);
@@ -288,15 +187,134 @@ class Database {
     });
   }
 
-  async savePendingChanges() {
-    for (const storeName in this.#unsavedChanges) {
-      const pendingChanges = this.#unsavedChanges[storeName];
-      this.#unsavedChanges[storeName] = new Map();
-      if (!pendingChanges.size) continue;
+  #addEventListeners() {
+    bus.on(EVENTS.TASK.CREATE, (task) => {
+      this.#save('tasks', task).then((result) => {
+        bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
+      });
+    });
 
-      this.#save(storeName, Array.from(pendingChanges.values()));
+    bus.on(EVENTS.TASK.EDIT, (task) => {
+      this.#unsavedChanges.tasks.set(task.id, task);
+    });
+
+    bus.on(EVENTS.TASK.DELETE, async (id) => this.#delete('tasks', id));
+    
+    bus.on(EVENTS.PROJECT.CREATE, async (project) => {
+      this.#save('projects', project).then((result) => {
+        bus.emit(EVENTS.DATABASE.PROJECT_ADDED, result[0]);
+      });
+    });
+
+    bus.on(EVENTS.PROJECT.EDIT, async (project) => {
+      this.#unsavedChanges.projects.set(project.id, project);
+    });
+
+    bus.on(EVENTS.PROJECT.DELETE, async (id) => {
+      try {
+        await this.#delete('projects', id);
+        const tasks = await this.getTasksByIndex('byProjectId', id);
+        if(tasks.length) await this.#delete('tasks', tasks.map(task => task.id));
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    bus.on(EVENTS.PAGE.NAVIGATE, () => this.#savePendingChanges());
+  }
+
+  #startPerodicDatabaseUpdate() {
+    setInterval(
+      () => this.#savePendingChanges(), 
+      Database.UPDATE_INTERVAL_IN_SEC  * 1000
+    );
+  }
+
+  #getObjectStore(storeName, mode) {
+    const transaction = this.#db.transaction(storeName, mode);
+    return transaction.objectStore(storeName);
+  }
+
+  async #save(storeName, items) {
+    return new Promise((resolve, reject) => {
+      const store = this.#getObjectStore(storeName, 'readwrite');
+      const results = [];
+      const errors = [];
+
+      const itemsArray = Array.isArray(items) ? items: [items];
+
+      for (const item of itemsArray) {
+        const request = store.put(item);
+
+        request.onsuccess = (e) => {
+          const id = item.id ?? e.target.result;
+          results.push({...item, id});
+        };
+        request.onerror = (e) => errors.push({item, error: e.target.error });
+      }
+
+      store.transaction.oncomplete = () => {
+        console.log(`Saving operation for ${storeName} store completed with:`, results);
+        if (errors.length > 0) {
+          console.warn('Some items failed to save:', errors);
+        }
+        resolve(results);
+      };
+      store.transaction.onerror = (e) => {
+        console.error(`Failed while updating ${storeName}`, e);
+        reject();
+      };
+    });
+  }
+  
+  async #delete(storeName, ids) {
+    return new Promise((resolve, reject) => {
+      const store = this.#getObjectStore(storeName, 'readwrite');
+
+      const idArray = Array.isArray(ids) ? ids: [ids];
+      for (const id of idArray) store.delete(id);
+
+      store.transaction.oncomplete = () => {
+        console.log(`Deleted ${idArray.length} items from ${storeName}`);
+        resolve();
+      };
+      store.transaction.onerror = (e) => reject(e.target.error);
+      store.transaction.onabort = (e) => reject(e.target.error);
+    });
+  }
+
+  #applyPendingChanges(items, changes) {
+    changes.values().forEach(change => {
+      let left = 0, right = items.length - 1;
+      
+      while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        const id = items[mid].id;
+
+        if (change.id < id) {
+          right = mid - 1;
+        } else if (change.id > id) {
+          left = mid + 1;
+        } else {
+          items[mid] = change;
+          break;
+        }
+      }
+    });
+
+    return items;
+  }
+
+  async #savePendingChanges() {
+    for (const storeName in this.#unsavedChanges) {
+      const pendingChanges = [...this.#unsavedChanges[storeName].values()];
+      this.#unsavedChanges[storeName] = new Map();
+      if (!pendingChanges.length) continue;
+
+      this.#save(storeName, pendingChanges);
     }
   }
+
 }
 
 export default new Database();
