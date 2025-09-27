@@ -283,26 +283,6 @@ class Database {
     });
   }
 
-  #applyPendingChanges(items, changes) {
-    changes.values().forEach(change => {
-      let left = 0, right = items.length - 1;
-      
-      while (left <= right) {
-        let mid = Math.floor((left + right) / 2);
-        const id = items[mid].id;
-
-        if (change.id < id) {
-          right = mid - 1;
-        } else if (change.id > id) {
-          left = mid + 1;
-        } else {
-          items[mid] = change;
-          break;
-        }
-      }
-    });
-
-    return items;
   }
 
   async #savePendingChanges() {
@@ -313,6 +293,23 @@ class Database {
 
       this.#save(storeName, pendingChanges);
     }
+  }
+
+
+  #applyPendingChanges(records, changes) {
+    if (Array.isArray(records)) {
+      const mappedItems = new Map(records.map(item => [item.id, item]));
+
+      for (const change of changes.values()) {
+        if (mappedItems.has(change.id))
+          mappedItems.set(change.id, change);
+      }
+
+      return Array.from(mappedItems.values());
+    }
+
+    const record = records;
+    return changes.get(record.id) || record;
   }
 
 }
