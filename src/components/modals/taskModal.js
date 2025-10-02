@@ -152,18 +152,23 @@ class TaskProject extends TaskInput {
     return field;
   }
 
-  #loadProjects() {
-    return db.getStoreItems('projects');
+  async #loadProjects() {
+    try {
+      const projects = await db.getStoreItems('projects');
+      this.fieldObject.populate(
+        projects.map(project => ({
+          value: project.id,
+          label: project.title
+        }))
+      );
+    } catch(error) {
+      console.error('Error while loading projects', error);
+    }
   }
 
+
   async init() {
-    const projects = await this.#loadProjects();
-    this.fieldObject.populate(
-      projects.map(project => ({
-        value: project.id,
-        label: project.title,
-      }))
-    );
+    await this.#loadProjects();
   }
 
   set value(projectID) {

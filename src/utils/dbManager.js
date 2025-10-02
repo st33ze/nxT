@@ -1,4 +1,5 @@
 import bus, { EVENTS } from "./bus";
+import { promisifyRequest } from "./dbUtils";
 
 const testTasks = [
   {
@@ -82,7 +83,7 @@ class Database {
     this.#startPerodicDatabaseUpdate();
   }
 
-  async init() {
+  init() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(Database.DB_NAME, Database.DB_VERSION);
 
@@ -117,96 +118,33 @@ class Database {
     });
   }
 
-  async getEntity(storeName, id) {
-    return new Promise((resolve, reject) => {
-      const pendingChanges = this.#unsavedChanges[storeName];
-      if (pendingChanges.has(id)) {
-        resolve(pendingChanges.get(id));
-      }
+  getEntity = (storeName, id) => this.#get(storeName, { id });
 
-      const store = this.#getObjectStore(storeName, 'readonly');
-      const request = store.get(id);
+  getStoreItems = storeName => this.#get(storeName);
 
-      request.onsuccess = (e) => {
-        const task = e.target.result;
-        if (task) {
-          resolve(task);
-        } else {
-          reject(new Error(`Entity with id:${id} not found in ${storeName}`));
-        }
-      };
-      
-      request.onerror = (e) =>
-        reject(e.target.error);
-    });
-  }
+  getTasksByIndex = (indexName, key) => this.#get('tasks', { indexName, key });
+
   
-  async getTasksByIndex(indexName, value) {
-    return new Promise((resolve, reject) => {
-      const store = this.#getObjectStore('tasks', 'readonly');
-
-      if (!store.indexNames.contains(indexName)) {
-        return reject(new Error(`Index ${indexName} not found in tasks store`));
-      }
-      
-      const index = store.index(indexName);
-      const range = IDBKeyRange.only(value);
-
-      const request = index.getAll(range);
-
-      request.onsuccess = (e) => {
-        const updatedTasks = this.#applyPendingChanges(
-          e.target.result,
-          this.#unsavedChanges['tasks']
-        );
-        resolve(updatedTasks);
-      };
-
-      request.onerror = (e) => {
-        reject(e.target.error);
-      };
-    });
-  }
-  
-  async getStoreItems(storeName) {
-    return new Promise((resolve, reject) => {
-      const store = this.#getObjectStore(storeName, 'readonly');
-      const request = store.getAll();
-
-      request.onsuccess = (e) => {
-        const updatedItems = this.#applyPendingChanges(
-          e.target.result, 
-          this.#unsavedChanges[storeName]
-        );
-        resolve(updatedItems);
-      }
-      request.onerror = (e) => {
-        console.error(`Error while getting items from store: ${storeName}`, e.target.error);
-        reject();
-      }
-    });
-  }
-
   #addEventListeners() {
-    bus.on(EVENTS.TASK.CREATE, (task) => {
+    bus.on(EVENTS.TASK.CREATE, task => {
       this.#save('tasks', task).then((result) => {
         bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
       });
     });
-
-    bus.on(EVENTS.TASK.EDIT, (task) => {
+    
+    bus.on(EVENTS.TASK.EDIT, task => {
       this.#unsavedChanges.tasks.set(task.id, task);
     });
 
-    bus.on(EVENTS.TASK.DELETE, async (id) => this.#delete('tasks', id));
+    bus.on(EVENTS.TASK.DELETE, id => this.#delete('tasks', id));
     
-    bus.on(EVENTS.PROJECT.CREATE, async (project) => {
+    bus.on(EVENTS.PROJECT.CREATE, project => {
       this.#save('projects', project).then((result) => {
         bus.emit(EVENTS.DATABASE.PROJECT_ADDED, result[0]);
       });
     });
 
-    bus.on(EVENTS.PROJECT.EDIT, async (project) => {
+    bus.on(EVENTS.PROJECT.EDIT, project => {
       this.#unsavedChanges.projects.set(project.id, project);
     });
 
@@ -219,33 +157,21 @@ class Database {
         console.error(error);
       }
     });
-
+    
     bus.on(EVENTS.PAGE.NAVIGATE, () => this.#savePendingChanges());
   }
-
-  #startPerodicDatabaseUpdate() {
-    setInterval(
-      () => this.#savePendingChanges(), 
-      Database.UPDATE_INTERVAL_IN_SEC  * 1000
-    );
-  }
-
-  #getObjectStore(storeName, mode) {
-    const transaction = this.#db.transaction(storeName, mode);
-    return transaction.objectStore(storeName);
-  }
-
-  async #save(storeName, items) {
+  
+  #save(storeName, items) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore(storeName, 'readwrite');
       const results = [];
       const errors = [];
-
+      
       const itemsArray = Array.isArray(items) ? items: [items];
 
       for (const item of itemsArray) {
         const request = store.put(item);
-
+        
         request.onsuccess = (e) => {
           const id = item.id ?? e.target.result;
           results.push({...item, id});
@@ -267,7 +193,12 @@ class Database {
     });
   }
   
-  async #delete(storeName, ids) {
+  #getObjectStore(storeName, mode) {
+    const transaction = this.#db.transaction(storeName, mode);
+    return transaction.objectStore(storeName);
+  }
+
+  #delete(storeName, ids) {
     return new Promise((resolve, reject) => {
       const store = this.#getObjectStore(storeName, 'readwrite');
 
@@ -283,6 +214,11 @@ class Database {
     });
   }
 
+  #startPerodicDatabaseUpdate() {
+    setInterval(
+      () => this.#savePendingChanges(),
+      Database.UPDATE_INTERVAL_IN_SEC  * 1000
+    );
   }
 
   async #savePendingChanges() {
@@ -295,6 +231,29 @@ class Database {
     }
   }
 
+  async #get(storeName, {id, indexName, key} = {}) {
+    const store = this.#getObjectStore(storeName, 'readonly');
+    let result;
+
+    if (id !== undefined) {
+      result = await promisifyRequest(store.get(id));
+    } else if (indexName !== undefined) {
+      if (!store.indexNames.contains(indexName))
+        throw new Error(`Index ${indexName} not found in ${storeName} store`);
+
+      if (key === undefined)
+        throw new Error(`Key must be provided when querying index ${indexName}`);
+
+      const index = store.index(indexName);
+      const range = IDBKeyRange.only(key);
+
+      result = await promisifyRequest(index.getAll(range));
+    } else {
+      result = await promisifyRequest(store.getAll());
+    }
+
+    return this.#applyPendingChanges(result, this.#unsavedChanges[storeName]);
+  }
 
   #applyPendingChanges(records, changes) {
     if (Array.isArray(records)) {

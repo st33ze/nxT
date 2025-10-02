@@ -29,6 +29,8 @@ export default class Inbox {
     db.getStoreItems('tasks').then(tasks => {
       this.#tasksLists = new MultiTaskLists(tasks);
       pageContent.appendChild(this.#tasksLists.node);
+    }).catch(error => {
+      console.error('Error while loading tasks', error);
     });
   }
   

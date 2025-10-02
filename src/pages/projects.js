@@ -31,7 +31,7 @@ export default class Projects {
       pageContent.appendChild(this.#projectList.node);
     }
     ).catch((error) => {
-      console.error('Error loading projects:', error);
+      console.error('Error while loading projects:', error);
     });
   }
 
