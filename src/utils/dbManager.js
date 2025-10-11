@@ -1,5 +1,5 @@
 import bus, { EVENTS } from "./bus";
-import { promisifyRequest } from "./dbUtils";
+import { promisifyRequest, transactionPromise } from "./dbUtils";
 
 const testTasks = [
   {
@@ -126,10 +126,13 @@ class Database {
 
   
   #addEventListeners() {
-    bus.on(EVENTS.TASK.CREATE, task => {
-      this.#save('tasks', task).then((result) => {
-        bus.emit(EVENTS.DATABASE.TASK_ADDED, result[0]);
-      });
+    bus.on(EVENTS.TASK.CREATE, async task => {
+      try {
+        const results = await this.#save('tasks', task);
+        bus.emit(EVENTS.DATABASE.TASK_ADDED, results[0].value);
+      } catch (error) {
+        console.error('💥 Failed to create task: ', error);
+      }
     });
     
     bus.on(EVENTS.TASK.EDIT, task => {
@@ -138,10 +141,13 @@ class Database {
 
     bus.on(EVENTS.TASK.DELETE, id => this.#delete('tasks', id));
     
-    bus.on(EVENTS.PROJECT.CREATE, project => {
-      this.#save('projects', project).then((result) => {
-        bus.emit(EVENTS.DATABASE.PROJECT_ADDED, result[0]);
-      });
+    bus.on(EVENTS.PROJECT.CREATE, async project => {
+      try {
+        const results = await this.#save('projects', project);
+        bus.emit(EVENTS.DATABASE.PROJECT_ADDED, results[0].value);
+      } catch (error) {
+        console.error('💥 Failed to create project: ', error);
+      }
     });
 
     bus.on(EVENTS.PROJECT.EDIT, project => {
@@ -161,36 +167,24 @@ class Database {
     bus.on(EVENTS.PAGE.NAVIGATE, () => this.#savePendingChanges());
   }
   
-  #save(storeName, items) {
-    return new Promise((resolve, reject) => {
-      const store = this.#getObjectStore(storeName, 'readwrite');
-      const results = [];
-      const errors = [];
-      
-      const itemsArray = Array.isArray(items) ? items: [items];
+  async #save(storeName, items) {
+    const store = this.#getObjectStore(storeName, 'readwrite');
+    items = Array.isArray(items) ? items: [items];
 
-      for (const item of itemsArray) {
-        const request = store.put(item);
-        
-        request.onsuccess = (e) => {
-          const id = item.id ?? e.target.result;
-          results.push({...item, id});
-        };
-        request.onerror = (e) => errors.push({item, error: e.target.error });
-      }
-
-      store.transaction.oncomplete = () => {
-        console.log(`Saving operation for ${storeName} store completed with:`, results);
-        if (errors.length > 0) {
-          console.warn('Some items failed to save:', errors);
+    const results = await Promise.all(
+      items.map(async item => {
+        try {
+          const id = await promisifyRequest(store.put(item));
+          return { ok: true, value: { ...item, id } }
+        } catch(error) {
+          return { ok: false, value:item, error};
         }
-        resolve(results);
-      };
-      store.transaction.onerror = (e) => {
-        console.error(`Failed while updating ${storeName}`, e);
-        reject();
-      };
-    });
+      })
+    );
+
+    await transactionPromise(store.transaction);
+
+    return results;
   }
   
   #getObjectStore(storeName, mode) {
@@ -222,12 +216,28 @@ class Database {
   }
 
   async #savePendingChanges() {
-    for (const storeName in this.#unsavedChanges) {
-      const pendingChanges = [...this.#unsavedChanges[storeName].values()];
-      this.#unsavedChanges[storeName] = new Map();
-      if (!pendingChanges.length) continue;
+    for (const [storeName, changesMap] of Object.entries(this.#unsavedChanges)) {
+      if (!changesMap.size) continue;
 
-      this.#save(storeName, pendingChanges);
+      const changes = [...changesMap.values()];
+
+      try {
+        const results = await this.#save(storeName, changes);
+        const successes = results.filter(r => r.ok);
+        const failures = results.filter(r => !r.ok);
+
+        // Keep records that failed and that were added/updated during await
+        this.#unsavedChanges[storeName] = new Map([
+          ...failures.map(f => [f.value.id, f.value]),
+          ...changesMap.values().filter(v => !changes.includes(v))
+        ]);
+
+        console.log(`✅ ${successes.length} ${storeName} items saved`);
+        if (failures.length)
+          console.warn(`⚠️ ${failures.length} failed to save in ${storeName} `, failures);
+      } catch(error) {
+        console.error(`💥 Error saving ${storeName}:`, error);
+      }
     }
   }
 
