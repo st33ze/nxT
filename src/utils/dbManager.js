@@ -158,7 +158,7 @@ class Database {
       try {
         await this.#delete('projects', id);
         const tasks = await this.getTasksByIndex('byProjectId', id);
-        if(tasks.length) await this.#delete('tasks', tasks.map(task => task.id));
+        if (tasks.length) await this.#delete('tasks', tasks.map(task => task.id));
       } catch (error) {
         console.error(error);
       }
@@ -192,20 +192,14 @@ class Database {
     return transaction.objectStore(storeName);
   }
 
-  #delete(storeName, ids) {
-    return new Promise((resolve, reject) => {
-      const store = this.#getObjectStore(storeName, 'readwrite');
+  async #delete(storeName, ids) {
+    const store = this.#getObjectStore(storeName, 'readwrite');
+    ids = Array.isArray(ids) ? ids: [ids];
 
-      const idArray = Array.isArray(ids) ? ids: [ids];
-      for (const id of idArray) store.delete(id);
+    await Promise.allSettled(ids.map(id => promisifyRequest(store.delete(id))));
+    await transactionPromise(store.transaction);
 
-      store.transaction.oncomplete = () => {
-        console.log(`Deleted ${idArray.length} items from ${storeName}`);
-        resolve();
-      };
-      store.transaction.onerror = (e) => reject(e.target.error);
-      store.transaction.onabort = (e) => reject(e.target.error);
-    });
+    console.log(`🗑️ Deleted ${ids.length} ${storeName} items`);
   }
 
   #startPerodicDatabaseUpdate() {
