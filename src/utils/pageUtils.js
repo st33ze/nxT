@@ -14,10 +14,24 @@ export function isModalOpen() {
   return modal.classList.contains('open');
 }
 
+function getFocusFallback(caller) {
+  const callerClass = ['project-card', 'li-task-title']
+    .find(c => caller.classList.contains(c));
+  if (!callerClass) return;
+
+  const items = Array.from(document.querySelectorAll(`.${callerClass}`));
+  const index = items.indexOf(caller);
+  const [next, prev] = [items[index + 1], items[index - 1]];
+
+  return next ?? prev ?? document.querySelector('.add-btn');
+}
+
 export function openModal(type, data = {}) {
-  bus.emit(EVENTS.MODAL.OPEN, {type, data});
-  
   const caller = document.activeElement;
+  const focusFallback = getFocusFallback(caller);
+
+  bus.emit(EVENTS.MODAL.OPEN, {type, data});
+
   const content = document.querySelector('.page-content');
   content.inert = true;
 
@@ -25,7 +39,8 @@ export function openModal(type, data = {}) {
     EVENTS.MODAL.CLOSE, 
     () => {
       content.inert = false;
-      caller?.focus();
+      const target = caller?.isConnected ? caller: focusFallback;
+      target?.focus();
     },
     {clearOnReload: true, once: true}
   );
