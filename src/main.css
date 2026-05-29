@@ -72,6 +72,12 @@ body {
   font-weight: var(--fw-regular);
   color: hsl(var(--clr-primary-500));
   background-color: hsl(var(--bg-primary-400));
+  outline-color: #E67E22;
+
+  :focus-visible {
+    outline: 2px solid #E67E22;
+    outline-offset: 2px;
+  }
 }
 #app {
   display: grid;
