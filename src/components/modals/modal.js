@@ -11,6 +11,7 @@ export const MODAL_CONTENT = {
 export default class Modal {
   #node;
   #loadedContent;
+  #contentContainer;
 
   constructor() {
     this.#node = createNode('div', {
@@ -18,10 +19,8 @@ export default class Modal {
       'aria-hidden': 'true',
     });
     
-    this.#node.append(
-      this.#createControlBtns(),
-      createNode('div', {class: 'modal-content'})
-    );
+    this.#contentContainer = createNode('div', { class: 'modal-content'});
+    this.#node.append(this.#createControlBtns(), this.#contentContainer);
 
     this.#addEventListeners();
 
@@ -52,7 +51,7 @@ export default class Modal {
   }
 
   #closeContent()  {
-    this.#node.querySelector('.modal-content > :last-child').remove();
+    this.#contentContainer.lastElementChild?.remove();
   }
 
   #createBackBtn() {
@@ -119,7 +118,7 @@ export default class Modal {
     bus.on(EVENTS.MODAL.CLOSE, () => this.#close(), {clearOnReload: true});
     
     bus.on(EVENTS.MODAL.CONTENT_CLOSE, () => {
-      if (this.#loadedContent.size > 1) {
+      if (this.#contentContainer.children.length > 1) {
         this.#closeContent();
       } else {
         bus.emit(EVENTS.MODAL.CLOSE);
