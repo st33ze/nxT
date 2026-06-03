@@ -249,6 +249,10 @@ class MultiTaskLists {
     if (taskList?.isEmpty) this.#removeList(taskList);
   }
 
+  get isEmpty() {
+    return this.#taskListMap.size === 0;
+  }
+
   get node() {
     return this.#node;
   }
