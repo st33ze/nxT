@@ -65,8 +65,8 @@ export default class Today {
           this.#taskList.save(task);
         } else {
           this.#taskList.delete(task.id);
+          this.#listContainer.sync();
         }
-        this.#listContainer.sync();
       },
       {clearOnReload: true}
     );
