@@ -103,6 +103,10 @@ export default class ProjectList {
     }
   }
 
+  get isEmpty() {
+    return this.#projects.size === 0;
+  }
+
   get node() {
     return this.#node;
   }
