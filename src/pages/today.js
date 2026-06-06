@@ -36,16 +36,20 @@ export default class Today {
   }
 
   async #generateTaskList() {
-    const tasks = await this.#loadTasksFromDB();
-    this.#taskList = new TaskList(tasks);
-
-    const emptyState = new EmptyState({
-      title: 'No Tasks Yet',
-      description: 'You\'re all cought up! Start by adding a new task'
-    });
-    this.#listContainer = new ListContainer(this.#taskList, emptyState);
-
-    this.#node.querySelector('.page-content').append(this.#listContainer.node);
+    try {
+      const tasks = await this.#loadTasksFromDB();
+      this.#taskList = new TaskList(tasks);
+  
+      const emptyState = new EmptyState({
+        title: 'No Tasks Yet',
+        description: 'You\'re all cought up! Start by adding a new task'
+      });
+      this.#listContainer = new ListContainer(this.#taskList, emptyState);
+  
+      this.#node.querySelector('.page-content').append(this.#listContainer.node);
+    } catch(error) {
+      console.error('Error while loading tasks', error);
+    }
   }
 
   #addEventListeners() {
