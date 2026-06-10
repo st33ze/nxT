@@ -2,6 +2,8 @@
 
 A task management application built with vanilla JavaScript that allows users to create, organize, and track tasks through a clean and responsive interface.
 
+🔗 **Live Application:** https://st33ze.github.io/nxT/
+
 ## Features
 
 - Create, edit, and delete tasks
